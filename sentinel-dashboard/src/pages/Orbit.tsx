@@ -35,10 +35,12 @@ export function Orbit() {
             <KPIGrid kpiData={kpiData} />
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 h-full">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 items-start">
                 {/* Price Chart - Takes 2 columns */}
-                <div className="lg:col-span-2 space-y-4">
-                    <PriceChart data={data} title="Bitcoin Price Action" height={350} />
+                <div className="lg:col-span-2 space-y-4 flex flex-col h-full">
+                    <div className="flex-1 min-h-[500px]">
+                        <PriceChart data={data} title="Bitcoin Price Action" height={500} />
+                    </div>
 
                     {/* Technical Analysis Grid - Fills space below chart */}
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -74,12 +76,12 @@ export function Orbit() {
                 </div>
 
                 {/* Right Column: Activity & Volume Stats */}
-                <div className="lg:col-span-1 space-y-4 flex flex-col">
+                <div className="lg:col-span-1 space-y-4 flex flex-col h-full">
                     <div className="flex-1">
-                        <RecentActivity data={data} limit={8} />
+                        <RecentActivity data={data} limit={15} />
                     </div>
 
-                    {/* Additional Volume Stat to fill vertical space */}
+                    {/* Additional Volume Stat */}
                     <Card className="p-4 bg-slate-900/50 border-slate-800">
                         <h3 className="text-sm font-medium text-slate-400 mb-2">Volume Analysis</h3>
                         <div className="flex items-end justify-between">
