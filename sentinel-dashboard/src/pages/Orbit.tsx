@@ -76,10 +76,8 @@ export function Orbit() {
                 </div>
 
                 {/* Right Column: Activity & Volume Stats */}
-                <div className="lg:col-span-1 space-y-3 flex flex-col h-full">
-                    <div className="flex-1">
-                        <RecentActivity data={data} limit={15} />
-                    </div>
+                <div className="lg:col-span-1 space-y-3">
+                    <RecentActivity data={data} limit={7} maxHeight={340} />
 
                     {/* Additional Volume Stat */}
                     <Card className="p-3 bg-slate-900/50 border-slate-800">

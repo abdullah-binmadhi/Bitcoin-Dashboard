@@ -41,6 +41,14 @@ export function formatShortDate(date: string | Date): string {
     }).format(new Date(date));
 }
 
+export function formatCompactDate(date: string | Date): string {
+    return new Intl.DateTimeFormat('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: '2-digit',
+    }).format(new Date(date));
+}
+
 export function getRSIStatus(rsi: number): { label: string; color: string } {
     if (rsi >= 70) {
         return { label: 'Overbought', color: 'text-rose-500' };
