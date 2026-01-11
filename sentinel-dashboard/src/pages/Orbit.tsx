@@ -19,9 +19,9 @@ export function Orbit() {
     const latest = data[data.length - 1];
 
     return (
-        <div className="space-y-4 max-w-[1920px] mx-auto">
+        <div className="space-y-3 max-w-[1920px] mx-auto">
             {/* Page Header - Compact */}
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-1">
                 <div className="rounded-xl bg-emerald-500/10 p-2">
                     <OrbitIcon className="h-5 w-5 text-emerald-500" />
                 </div>
@@ -35,15 +35,15 @@ export function Orbit() {
             <KPIGrid kpiData={kpiData} />
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 items-start">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 items-start">
                 {/* Price Chart - Takes 2 columns */}
-                <div className="lg:col-span-2 space-y-4 flex flex-col h-full">
-                    <div className="flex-1 min-h-[500px]">
-                        <PriceChart data={data} title="Bitcoin Price Action" height={500} />
+                <div className="lg:col-span-2 space-y-3 flex flex-col h-full">
+                    <div className="flex-1 min-h-[420px]">
+                        <PriceChart data={data} title="Bitcoin Price Action" height={420} />
                     </div>
 
                     {/* Technical Analysis Grid - Fills space below chart */}
-                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                         <TechCard
                             title="RSI (14)"
                             value={latest?.rsi?.toFixed(2) || 'N/A'}
@@ -76,13 +76,13 @@ export function Orbit() {
                 </div>
 
                 {/* Right Column: Activity & Volume Stats */}
-                <div className="lg:col-span-1 space-y-4 flex flex-col h-full">
+                <div className="lg:col-span-1 space-y-3 flex flex-col h-full">
                     <div className="flex-1">
                         <RecentActivity data={data} limit={15} />
                     </div>
 
                     {/* Additional Volume Stat */}
-                    <Card className="p-4 bg-slate-900/50 border-slate-800">
+                    <Card className="p-3 bg-slate-900/50 border-slate-800">
                         <h3 className="text-sm font-medium text-slate-400 mb-2">Volume Analysis</h3>
                         <div className="flex items-end justify-between">
                             <div>
@@ -102,7 +102,7 @@ export function Orbit() {
             </div>
 
             {/* Bottom Stats Row - Compact */}
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <StatCard
                     label="52W High"
                     value={`$${Math.max(...data.map((d) => d.high)).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
