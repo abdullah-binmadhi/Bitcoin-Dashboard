@@ -2,7 +2,8 @@ import { useBitcoinData } from '@/hooks/useBitcoinData';
 import { KPIGrid } from '@/components/cards/KPICard';
 import { RecentActivity } from '@/components/cards/RecentActivity';
 import { PriceChart } from '@/components/charts/PriceChart';
-import { Orbit as OrbitIcon } from 'lucide-react';
+import { Orbit as OrbitIcon, TrendingUp, Activity, Waves, MoveVertical } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 export function Orbit() {
     const { data, kpiData, loading } = useBitcoinData(365);
@@ -15,67 +16,130 @@ export function Orbit() {
         );
     }
 
+    const latest = data[data.length - 1];
+
     return (
-        <div className="space-y-6">
-            {/* Page Header */}
-            <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-emerald-500/10 p-3">
-                    <OrbitIcon className="h-6 w-6 text-emerald-500" />
+        <div className="space-y-4 max-w-[1920px] mx-auto">
+            {/* Page Header - Compact */}
+            <div className="flex items-center gap-3 mb-2">
+                <div className="rounded-xl bg-emerald-500/10 p-2">
+                    <OrbitIcon className="h-5 w-5 text-emerald-500" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-100">Orbit</h1>
-                    <p className="text-sm text-slate-400">Executive Overview</p>
+                    <h1 className="text-xl font-bold text-slate-100">Orbit</h1>
+                    <p className="text-xs text-slate-400">Executive Overview</p>
                 </div>
             </div>
 
-            {/* KPI Grid */}
+            {/* KPI Grid - Top Stats */}
             <KPIGrid kpiData={kpiData} />
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 h-full">
                 {/* Price Chart - Takes 2 columns */}
-                <div className="lg:col-span-2">
-                    <PriceChart data={data} title="Bitcoin Price (1 Year)" height={400} />
+                <div className="lg:col-span-2 space-y-4">
+                    <PriceChart data={data} title="Bitcoin Price Action" height={350} />
+
+                    {/* Technical Analysis Grid - Fills space below chart */}
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                        <TechCard
+                            title="RSI (14)"
+                            value={latest?.rsi?.toFixed(2) || 'N/A'}
+                            status={latest?.rsi ? (latest.rsi > 70 ? 'Overbought' : latest.rsi < 30 ? 'Oversold' : 'Neutral') : '-'}
+                            icon={<Activity className="h-4 w-4" />}
+                            color="text-blue-500"
+                        />
+                        <TechCard
+                            title="Bollinger Width"
+                            value={latest?.bb_upper && latest?.bb_lower ? (((latest.bb_upper - latest.bb_lower) / latest.close) * 100).toFixed(2) + '%' : 'N/A'}
+                            status="Volatility"
+                            icon={<Waves className="h-4 w-4" />}
+                            color="text-purple-500"
+                        />
+                        <TechCard
+                            title="SMA Trend"
+                            value={latest?.close > (latest?.sma_200 || 0) ? 'Bullish' : 'Bearish'}
+                            status="Long Term"
+                            icon={<TrendingUp className="h-4 w-4" />}
+                            color={latest?.close > (latest?.sma_200 || 0) ? 'text-emerald-500' : 'text-rose-500'}
+                        />
+                        <TechCard
+                            title="Daily Range"
+                            value={latest ? ((latest.high - latest.low) / latest.low * 100).toFixed(2) + '%' : 'N/A'}
+                            status="Volatility"
+                            icon={<MoveVertical className="h-4 w-4" />}
+                            color="text-amber-500"
+                        />
+                    </div>
                 </div>
 
-                {/* Recent Activity - Takes 1 column */}
-                <div className="lg:col-span-1">
-                    <RecentActivity data={data} limit={7} />
+                {/* Right Column: Activity & Volume Stats */}
+                <div className="lg:col-span-1 space-y-4 flex flex-col">
+                    <div className="flex-1">
+                        <RecentActivity data={data} limit={8} />
+                    </div>
+
+                    {/* Additional Volume Stat to fill vertical space */}
+                    <Card className="p-4 bg-slate-900/50 border-slate-800">
+                        <h3 className="text-sm font-medium text-slate-400 mb-2">Volume Analysis</h3>
+                        <div className="flex items-end justify-between">
+                            <div>
+                                <p className="text-2xl font-bold text-slate-100">
+                                    ${(latest?.volume / 1e9).toFixed(1)}B
+                                </p>
+                                <p className="text-xs text-slate-500">24h Volume</p>
+                            </div>
+                            <div className="h-8 w-24 bg-slate-800 rounded-md flex items-end justify-around px-1 pb-1">
+                                {[40, 70, 45, 90, 60].map((h, i) => (
+                                    <div key={i} className="w-2 bg-emerald-500/50 rounded-sm" style={{ height: `${h}%` }} />
+                                ))}
+                            </div>
+                        </div>
+                    </Card>
                 </div>
             </div>
 
-            {/* Stats Cards */}
+            {/* Bottom Stats Row - Compact */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <StatCard
-                    label="52 Week High"
+                    label="52W High"
                     value={`$${Math.max(...data.map((d) => d.high)).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-                    subtext="Maximum"
+                    subtext="Yearly Max"
                     color="text-emerald-500"
                 />
                 <StatCard
-                    label="52 Week Low"
+                    label="52W Low"
                     value={`$${Math.min(...data.map((d) => d.low)).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-                    subtext="Minimum"
+                    subtext="Yearly Min"
                     color="text-rose-500"
                 />
                 <StatCard
-                    label="Avg Daily Volume"
-                    value={`$${(
-                        data.reduce((sum, d) => sum + d.volume, 0) /
-                        data.length /
-                        1e9
-                    ).toFixed(1)}B`}
-                    subtext="Per day"
+                    label="Avg Volume"
+                    value={`$${(data.reduce((sum, d) => sum + d.volume, 0) / data.length / 1e9).toFixed(1)}B`}
+                    subtext="Daily Avg"
                     color="text-blue-500"
                 />
                 <StatCard
-                    label="Data Points"
-                    value={data.length.toString()}
-                    subtext="Days of history"
-                    color="text-purple-500"
+                    label="Dataset"
+                    value={`${data.length} Days`}
+                    subtext="History"
+                    color="text-slate-400"
                 />
             </div>
         </div>
+    );
+}
+
+function TechCard({ title, value, status, icon, color }: { title: string, value: string, status: string, icon: React.ReactNode, color: string }) {
+    return (
+        <Card className="p-4 bg-slate-900/40 border-slate-800 hover:bg-slate-800/60 transition-colors">
+            <div className="flex items-center gap-2 mb-2 text-slate-400">
+                {icon}
+                <span className="text-xs font-medium">{title}</span>
+            </div>
+            <div className="text-lg font-bold text-slate-100">{value}</div>
+            <div className={`text-xs ${color} font-medium`}>{status}</div>
+        </Card>
     );
 }
 
@@ -88,10 +152,10 @@ interface StatCardProps {
 
 function StatCard({ label, value, subtext, color }: StatCardProps) {
     return (
-        <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-            <p className="text-xs text-slate-500 uppercase tracking-wider">{label}</p>
-            <p className={`text-xl font-bold ${color} tabular-nums mt-1`}>{value}</p>
-            <p className="text-xs text-slate-400">{subtext}</p>
+        <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider">{label}</p>
+            <p className={`text-lg font-bold ${color} tabular-nums mt-0.5`}>{value}</p>
+            <p className="text-[10px] text-slate-400">{subtext}</p>
         </div>
     );
 }
