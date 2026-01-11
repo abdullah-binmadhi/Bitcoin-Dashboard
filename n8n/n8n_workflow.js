@@ -148,6 +148,12 @@ module.exports = { processMarketData, calculateSMA, calculateRSI, calculateBolli
       "parameters": {
         "url": "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart",
         "options": {},
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-cg-demo-api-key", "value": "CG-unVU5nDtud2jHLq8eBU1shZ2" }
+          ]
+        },
         "sendQuery": true,
         "queryParameters": {
           "parameters": [

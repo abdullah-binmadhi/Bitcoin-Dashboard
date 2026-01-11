@@ -1,0 +1,118 @@
+{
+  "name": "Sentinel Bitcoin Sync (Node.js Direct)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart",
+        "options": {},
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-cg-demo-api-key",
+              "value": "CG-unVU5nDtud2jHLq8eBU1shZ2"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "vs_currency",
+              "value": "usd"
+            },
+            {
+              "name": "days",
+              "value": "365"
+            }
+          ]
+        }
+      },
+      "name": "CoinGecko API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function calculateSMA(prices,period){if(prices.length<period)return null;const slice=prices.slice(-period);return slice.reduce((a,b)=>a+b,0)/period}function calculateRSI(prices,period=14){if(prices.length<period+1)return null;let gains=0;let losses=0;for(let i=prices.length-period;i<prices.length;i++){const diff=prices[i]-prices[i-1];if(diff>0)gains+=diff;else losses-=diff}const avgGain=gains/period;const avgLoss=losses/period;if(avgLoss===0)return 100;const rs=avgGain/avgLoss;return 100-(100/(1+rs))}function calculateBollingerBands(prices,period=20,stdDev=2){if(prices.length<period)return{upper:null,lower:null};const slice=prices.slice(-period);const sma=slice.reduce((a,b)=>a+b,0)/period;const variance=slice.reduce((a,b)=>a+Math.pow(b-sma,2),0)/period;const std=Math.sqrt(variance);return{upper:sma+(stdDev*std),lower:sma-(stdDev*std)}}function processMarketData(items){const rawData=items[0].json;const priceData=rawData.prices||[];if(priceData.length===0){throw new Error('No price data received from CoinGecko API')}const closePrices=[];let maxPrice=0;const results=[];for(const[timestamp,price]of priceData){closePrices.push(price);if(price>maxPrice)maxPrice=price;const date=new Date(timestamp).toISOString().split('T')[0];const sma50=calculateSMA(closePrices,50);const sma200=calculateSMA(closePrices,200);const rsi=calculateRSI(closePrices,14);const{upper:bbUpper,lower:bbLower}=calculateBollingerBands(closePrices,20,2);const drawdownPct=((price-maxPrice)/maxPrice)*100;results.push({date,close:Math.round(price*100)/100,open:Math.round(price*100)/100,low:Math.round(price*100)/100,high:Math.round(price*100)/100,volume:0,sma_50:sma50?Math.round(sma50*100)/100:null,sma_200:sma200?Math.round(sma200*100)/100:null,rsi:rsi?Math.round(rsi*100)/100:null,bb_upper:bbUpper?Math.round(bbUpper*100)/100:null,bb_lower:bbLower?Math.round(bbLower*100)/100:null,drawdown_pct:Math.round(drawdownPct*100)/100})}return results.slice(-30)}return $input.all().map(item=>{const processedData=processMarketData($input.all());return processedData.map(row=>({json:row}))}).flat();"
+      },
+      "name": "Calculate Indicators",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=node -e '\nconst https = require(\"https\");\nconst payload = process.argv[1];\nconst options = {\n  hostname: \"uzxocjwuisgzldbtppnk.supabase.co\",\n  path: \"/rest/v1/bitcoin_data\",\n  method: \"POST\",\n  headers: {\n    \"apikey\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODEyNTA2MywiZXhwIjoyMDgzNzAxMDYzfQ.xMKopVQ2t-QkXgLKWBvTYim7QuJIv0ulzuT_xA5EpV8\",\n    \"Authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODEyNTA2MywiZXhwIjoyMDgzNzAxMDYzfQ.xMKopVQ2t-QkXgLKWBvTYim7QuJIv0ulzuT_xA5EpV8\",\n    \"Content-Type\": \"application/json\",\n    \"Prefer\": \"resolution=merge-duplicates\",\n    \"Content-Length\": Buffer.byteLength(payload)\n  }\n};\nconst req = https.request(options, (res) => {\n  console.log(\"Status:\", res.statusCode);\n  res.on(\"data\", (d) => process.stdout.write(d));\n});\nreq.on(\"error\", (e) => { console.error(e); process.exit(1); });\nreq.write(payload);\nreq.end();\n' '{{JSON.stringify($json)}}'"
+      },
+      "name": "Execute Node Script",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "CoinGecko API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CoinGecko API": {
+      "main": [
+        [
+          {
+            "node": "Calculate Indicators",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Indicators": {
+      "main": [
+        [
+          {
+            "node": "Execute Node Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

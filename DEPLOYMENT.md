@@ -24,6 +24,7 @@ This project is a React application built with Vite, located in the `sentinel-da
     | --- | --- |
     | `VITE_SUPABASE_URL` | `https://uzxocjwuisgzldbtppnk.supabase.co` |
     | `VITE_SUPABASE_ANON_KEY` | *(Your Supabase Anon Key)* |
+    | `VITE_COINGECKO_API_KEY` | `CG-unVU5nDtud2jHLq8eBU1shZ2` |
 
     *Note: Do NOT use the Service Role Key here. Use the Anon Key found in your Supabase dashboard.*
 
