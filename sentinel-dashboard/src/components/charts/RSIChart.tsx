@@ -8,6 +8,7 @@ import {
     ResponsiveContainer,
     ReferenceLine,
     ReferenceArea,
+    Brush
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatShortDate } from '@/lib/utils';
@@ -160,6 +161,13 @@ export function RSIChart({ data, height = 200 }: RSIChartProps) {
                                 stroke: '#0f172a',
                                 strokeWidth: 2,
                             }}
+                        />
+                        <Brush 
+                            dataKey="date" 
+                            height={30} 
+                            stroke="#a78bfa" 
+                            fill="#1e293b"
+                            tickFormatter={(date) => formatShortDate(date)}
                         />
                     </LineChart>
                 </ResponsiveContainer>

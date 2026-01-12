@@ -7,6 +7,7 @@ import {
     Tooltip,
     ResponsiveContainer,
     ReferenceLine,
+    Brush
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatShortDate } from '@/lib/utils';
@@ -142,6 +143,13 @@ export function DrawdownChart({ data, height = 300 }: DrawdownChartProps) {
                                 stroke: '#0f172a',
                                 strokeWidth: 2,
                             }}
+                        />
+                        <Brush 
+                            dataKey="date" 
+                            height={30} 
+                            stroke="#f43f5e" 
+                            fill="#1e293b"
+                            tickFormatter={(date) => formatShortDate(date)}
                         />
                     </AreaChart>
                 </ResponsiveContainer>

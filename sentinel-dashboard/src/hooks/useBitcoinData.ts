@@ -29,7 +29,16 @@ export function useBitcoinData(options: UseBitcoinDataOptions = {}): UseBitcoinD
 
         if (!isSupabaseConfigured) {
             // Use mock data in demo mode
-            const mockData = generateMockData(limit || 365);
+            let mockData = generateMockData(limit || 365 * 2); // Generate more history for filtering
+            
+            // Apply filtering to mock data too
+            if (year && year !== 'ALL') {
+                const yearStr = year.toString();
+                mockData = mockData.filter(d => d.date.startsWith(yearStr));
+            } else if (limit && !year) {
+                mockData = mockData.slice(-limit); // Keep last N days
+            }
+
             setData(mockData);
             setLoading(false);
             return;

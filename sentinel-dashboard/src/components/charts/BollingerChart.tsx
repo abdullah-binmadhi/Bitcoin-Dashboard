@@ -7,6 +7,7 @@ import {
     CartesianGrid,
     Tooltip,
     ResponsiveContainer,
+    Brush
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency, formatShortDate } from '@/lib/utils';
@@ -222,6 +223,13 @@ export function BollingerChart({ data, height = 500 }: BollingerChartProps) {
                                 stroke: '#0f172a',
                                 strokeWidth: 2,
                             }}
+                        />
+                        <Brush 
+                            dataKey="date" 
+                            height={30} 
+                            stroke="#475569" 
+                            fill="#1e293b"
+                            tickFormatter={(date) => formatShortDate(date)}
                         />
                     </ComposedChart>
                 </ResponsiveContainer>
