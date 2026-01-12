@@ -3,14 +3,13 @@ import { BollingerChart } from '@/components/charts/BollingerChart';
 import { RSIChart } from '@/components/charts/RSIChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Wrench, TrendingUp, TrendingDown, Activity, Target } from 'lucide-react';
-import { formatCurrency, formatNumber, cn } from '@/lib/utils';
+import { formatCurrency, formatNumber } from '@/lib/utils';
 import { useState } from 'react';
-
-const YEARS = ['ALL', 2026, 2025, 2024, 2023];
+import { YearFilter } from '@/components/ui/YearFilter';
 
 export function Mechanic() {
     const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
-    const { data, latestData, loading } = useBitcoinData({ year: selectedYear, limit: selectedYear === 'ALL' ? 365 : undefined });
+    const { data, latestData, loading } = useBitcoinData({ year: selectedYear, limit: selectedYear === 'ALL' ? undefined : undefined });
 
     if (loading) {
         return (
@@ -48,22 +47,7 @@ export function Mechanic() {
                 </div>
 
                 {/* Year Selector */}
-                <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-lg border border-slate-800 overflow-x-auto">
-                    {YEARS.map((year) => (
-                        <button
-                            key={year}
-                            onClick={() => setSelectedYear(year)}
-                            className={cn(
-                                "px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap",
-                                selectedYear === year
-                                    ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
-                                    : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
-                            )}
-                        >
-                            {year}
-                        </button>
-                    ))}
-                </div>
+                <YearFilter selectedYear={selectedYear} onChange={setSelectedYear} />
             </div>
 
             {/* Technical Indicator Summary Cards */}

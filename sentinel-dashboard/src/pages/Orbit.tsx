@@ -5,13 +5,11 @@ import { PriceChart } from '@/components/charts/PriceChart';
 import { Orbit as OrbitIcon, TrendingUp, Activity, Waves, MoveVertical } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
-
-const YEARS = ['ALL', 2026, 2025, 2024, 2023];
+import { YearFilter } from '@/components/ui/YearFilter';
 
 export function Orbit() {
     const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
-    const { data, kpiData, loading } = useBitcoinData({ year: selectedYear, limit: selectedYear === 'ALL' ? 365 : undefined });
+    const { data, kpiData, loading } = useBitcoinData({ year: selectedYear, limit: selectedYear === 'ALL' ? undefined : undefined });
 
     if (loading) {
         return (
@@ -38,22 +36,7 @@ export function Orbit() {
                 </div>
 
                 {/* Year Selector */}
-                <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-lg border border-slate-800 overflow-x-auto">
-                    {YEARS.map((year) => (
-                        <button
-                            key={year}
-                            onClick={() => setSelectedYear(year)}
-                            className={cn(
-                                "px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap",
-                                selectedYear === year
-                                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
-                                    : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
-                            )}
-                        >
-                            {year}
-                        </button>
-                    ))}
-                </div>
+                <YearFilter selectedYear={selectedYear} onChange={setSelectedYear} />
             </div>
 
             {/* KPI Grid - Top Stats */}

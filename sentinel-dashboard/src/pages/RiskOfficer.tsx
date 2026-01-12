@@ -3,14 +3,13 @@ import { DrawdownChart } from '@/components/charts/DrawdownChart';
 import { HistogramChart } from '@/components/charts/HistogramChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, AlertTriangle, TrendingDown, BarChart3, Activity } from 'lucide-react';
-import { formatPercent, cn } from '@/lib/utils';
+import { formatPercent } from '@/lib/utils';
 import { useMemo, useState } from 'react';
-
-const YEARS = ['ALL', 2026, 2025, 2024, 2023];
+import { YearFilter } from '@/components/ui/YearFilter';
 
 export function RiskOfficer() {
     const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
-    const { data, latestData, loading } = useBitcoinData({ year: selectedYear, limit: selectedYear === 'ALL' ? 365 : undefined });
+    const { data, latestData, loading } = useBitcoinData({ year: selectedYear, limit: selectedYear === 'ALL' ? undefined : undefined });
 
     // Calculate risk metrics
     const riskMetrics = useMemo(() => {
@@ -99,22 +98,7 @@ export function RiskOfficer() {
                     </div>
 
                     {/* Year Selector */}
-                    <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-lg border border-slate-800 overflow-x-auto">
-                        {YEARS.map((year) => (
-                            <button
-                                key={year}
-                                onClick={() => setSelectedYear(year)}
-                                className={cn(
-                                    "px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap",
-                                    selectedYear === year
-                                        ? "bg-red-500 text-white shadow-lg shadow-red-500/20"
-                                        : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
-                                )}
-                            >
-                                {year}
-                            </button>
-                        ))}
-                    </div>
+                    <YearFilter selectedYear={selectedYear} onChange={setSelectedYear} />
                 </div>
                 
                 <Card className="flex flex-col items-center justify-center py-20 text-center border-dashed">
@@ -143,22 +127,7 @@ export function RiskOfficer() {
                 </div>
 
                 {/* Year Selector */}
-                <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-lg border border-slate-800 overflow-x-auto">
-                    {YEARS.map((year) => (
-                        <button
-                            key={year}
-                            onClick={() => setSelectedYear(year)}
-                            className={cn(
-                                "px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap",
-                                selectedYear === year
-                                    ? "bg-red-500 text-white shadow-lg shadow-red-500/20"
-                                    : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
-                            )}
-                        >
-                            {year}
-                        </button>
-                    ))}
-                </div>
+                <YearFilter selectedYear={selectedYear} onChange={setSelectedYear} />
             </div>
 
             {/* Risk Metrics Grid */}
