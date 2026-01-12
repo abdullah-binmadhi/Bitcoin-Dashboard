@@ -3,11 +3,14 @@ import { DrawdownChart } from '@/components/charts/DrawdownChart';
 import { HistogramChart } from '@/components/charts/HistogramChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, AlertTriangle, TrendingDown, BarChart3, Activity } from 'lucide-react';
-import { formatPercent } from '@/lib/utils';
-import { useMemo } from 'react';
+import { formatPercent, cn } from '@/lib/utils';
+import { useMemo, useState } from 'react';
+
+const YEARS = ['ALL', 2026, 2025, 2024, 2023];
 
 export function RiskOfficer() {
-    const { data, latestData, loading } = useBitcoinData({ limit: 365 });
+    const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
+    const { data, latestData, loading } = useBitcoinData({ year: selectedYear, limit: selectedYear === 'ALL' ? 365 : undefined });
 
     // Calculate risk metrics
     const riskMetrics = useMemo(() => {
@@ -72,7 +75,7 @@ export function RiskOfficer() {
         };
     }, [data, latestData]);
 
-    if (loading || !riskMetrics) {
+    if (loading) {
         return (
             <div className="flex h-[calc(100vh-10rem)] items-center justify-center">
                 <div className="animate-spin h-8 w-8 border-4 border-slate-700 border-t-emerald-500 rounded-full" />
@@ -83,13 +86,33 @@ export function RiskOfficer() {
     return (
         <div className="space-y-6">
             {/* Page Header */}
-            <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-red-500/10 p-3">
-                    <Shield className="h-6 w-6 text-red-500" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="rounded-xl bg-red-500/10 p-3">
+                        <Shield className="h-6 w-6 text-red-500" />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold text-slate-100">Risk Officer</h1>
+                        <p className="text-sm text-slate-400">Drawdown & Volatility Analysis</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-100">Risk Officer</h1>
-                    <p className="text-sm text-slate-400">Drawdown & Volatility Analysis</p>
+
+                {/* Year Selector */}
+                <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-lg border border-slate-800 overflow-x-auto">
+                    {YEARS.map((year) => (
+                        <button
+                            key={year}
+                            onClick={() => setSelectedYear(year)}
+                            className={cn(
+                                "px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap",
+                                selectedYear === year
+                                    ? "bg-red-500 text-white shadow-lg shadow-red-500/20"
+                                    : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
+                            )}
+                        >
+                            {year}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -97,28 +120,28 @@ export function RiskOfficer() {
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 <MetricCard
                     title="Current Drawdown"
-                    value={formatPercent(riskMetrics.currentDrawdown)}
+                    value={formatPercent(riskMetrics?.currentDrawdown || 0)}
                     subtitle="From ATH"
                     icon={<TrendingDown className="h-6 w-6" />}
-                    color={riskMetrics.currentDrawdown > -10 ? 'emerald' : riskMetrics.currentDrawdown > -30 ? 'orange' : 'rose'}
+                    color={riskMetrics && riskMetrics.currentDrawdown > -10 ? 'emerald' : riskMetrics && riskMetrics.currentDrawdown > -30 ? 'orange' : 'rose'}
                 />
                 <MetricCard
-                    title="Max Drawdown"
-                    value={formatPercent(riskMetrics.maxDrawdown)}
-                    subtitle="Worst case (1Y)"
+                    title={`Max Drawdown (${selectedYear})`}
+                    value={formatPercent(riskMetrics?.maxDrawdown || 0)}
+                    subtitle="Worst case period"
                     icon={<AlertTriangle className="h-6 w-6" />}
                     color="rose"
                 />
                 <MetricCard
                     title="Daily Volatility"
-                    value={`${riskMetrics.volatility.toFixed(2)}%`}
-                    subtitle={`${riskMetrics.annualizedVolatility.toFixed(0)}% annualized`}
+                    value={`${riskMetrics?.volatility.toFixed(2) || 0}%`}
+                    subtitle={`${riskMetrics?.annualizedVolatility.toFixed(0) || 0}% annualized`}
                     icon={<Activity className="h-6 w-6" />}
                     color="purple"
                 />
                 <MetricCard
                     title="VaR (95%)"
-                    value={formatPercent(riskMetrics.var95)}
+                    value={formatPercent(riskMetrics?.var95 || 0)}
                     subtitle="Daily worst case"
                     icon={<BarChart3 className="h-6 w-6" />}
                     color="amber"

@@ -3,10 +3,14 @@ import { BollingerChart } from '@/components/charts/BollingerChart';
 import { RSIChart } from '@/components/charts/RSIChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Wrench, TrendingUp, TrendingDown, Activity, Target } from 'lucide-react';
-import { formatCurrency, formatNumber } from '@/lib/utils';
+import { formatCurrency, formatNumber, cn } from '@/lib/utils';
+import { useState } from 'react';
+
+const YEARS = ['ALL', 2026, 2025, 2024, 2023];
 
 export function Mechanic() {
-    const { data, latestData, loading } = useBitcoinData({ limit: 365 });
+    const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
+    const { data, latestData, loading } = useBitcoinData({ year: selectedYear, limit: selectedYear === 'ALL' ? 365 : undefined });
 
     if (loading) {
         return (
@@ -32,13 +36,33 @@ export function Mechanic() {
     return (
         <div className="space-y-6">
             {/* Page Header */}
-            <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-orange-500/10 p-3">
-                    <Wrench className="h-6 w-6 text-orange-500" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="rounded-xl bg-orange-500/10 p-3">
+                        <Wrench className="h-6 w-6 text-orange-500" />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold text-slate-100">The Mechanic</h1>
+                        <p className="text-sm text-slate-400">Technical Analysis</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-100">The Mechanic</h1>
-                    <p className="text-sm text-slate-400">Technical Analysis</p>
+
+                {/* Year Selector */}
+                <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-lg border border-slate-800 overflow-x-auto">
+                    {YEARS.map((year) => (
+                        <button
+                            key={year}
+                            onClick={() => setSelectedYear(year)}
+                            className={cn(
+                                "px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap",
+                                selectedYear === year
+                                    ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                                    : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
+                            )}
+                        >
+                            {year}
+                        </button>
+                    ))}
                 </div>
             </div>
 
