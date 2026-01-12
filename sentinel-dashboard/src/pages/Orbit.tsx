@@ -106,10 +106,10 @@ export function Orbit() {
 
                 {/* Right Column: Activity & Volume Stats */}
                 <div className="lg:col-span-1 space-y-3 flex flex-col self-stretch">
-                    <RecentActivity data={data} limit={7} maxHeight={340} />
+                    <RecentActivity data={data} limit={14} maxHeight={550} />
 
-                    {/* Additional Volume Stat - Now stretches to fill space */}
-                    <Card className="p-5 bg-slate-900/50 border-slate-800 flex-1 flex flex-col justify-between">
+                    {/* Additional Volume Stat - Compact without chart */}
+                    <Card className="p-5 bg-slate-900/50 border-slate-800">
                         <div>
                             <h3 className="text-sm font-medium text-slate-400 mb-4">Volume Analysis</h3>
                             <div className="space-y-4">
@@ -126,16 +126,6 @@ export function Orbit() {
                                     <p className="text-xs text-emerald-500 mt-1">High (Optimal)</p>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div className="h-24 w-full bg-slate-800/30 rounded-xl flex items-end justify-around px-4 pb-2 mt-6">
-                            {[30, 60, 45, 80, 55, 90, 70, 40].map((h, i) => (
-                                <div 
-                                    key={i} 
-                                    className="w-3 bg-emerald-500/40 rounded-t-sm transition-all hover:bg-emerald-500" 
-                                    style={{ height: `${h}%` }} 
-                                />
-                            ))}
                         </div>
                     </Card>
                 </div>
