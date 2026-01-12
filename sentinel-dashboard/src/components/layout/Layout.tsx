@@ -5,8 +5,7 @@ import { useBitcoinData } from '@/hooks/useBitcoinData';
 import { useState } from 'react';
 
 export function Layout() {
-    const { kpiData, loading } = useBitcoinData(365);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const { kpiData, loading } = useBitcoinData({ limit: 365 });
 
     return (
         <div className="min-h-screen bg-slate-950 bg-grid">

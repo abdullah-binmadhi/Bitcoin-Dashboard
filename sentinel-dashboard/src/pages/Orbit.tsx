@@ -2,11 +2,16 @@ import { useBitcoinData } from '@/hooks/useBitcoinData';
 import { KPIGrid } from '@/components/cards/KPICard';
 import { RecentActivity } from '@/components/cards/RecentActivity';
 import { PriceChart } from '@/components/charts/PriceChart';
-import { Orbit as OrbitIcon, TrendingUp, Activity, Waves, MoveVertical } from 'lucide-react';
+import { Orbit as OrbitIcon, TrendingUp, Activity, Waves, MoveVertical, Calendar } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
+
+const YEARS = ['ALL', 2026, 2025, 2024, 2023];
 
 export function Orbit() {
-    const { data, kpiData, loading } = useBitcoinData(365);
+    const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
+    const { data, kpiData, loading } = useBitcoinData({ year: selectedYear, limit: selectedYear === 'ALL' ? 365 : undefined });
 
     if (loading) {
         return (
@@ -20,14 +25,34 @@ export function Orbit() {
 
     return (
         <div className="space-y-3 max-w-[1920px] mx-auto">
-            {/* Page Header - Compact */}
-            <div className="flex items-center gap-3 mb-1">
-                <div className="rounded-xl bg-emerald-500/10 p-2">
-                    <OrbitIcon className="h-5 w-5 text-emerald-500" />
+            {/* Page Header - Compact with Year Filter */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-1">
+                <div className="flex items-center gap-3">
+                    <div className="rounded-xl bg-emerald-500/10 p-2">
+                        <OrbitIcon className="h-5 w-5 text-emerald-500" />
+                    </div>
+                    <div>
+                        <h1 className="text-xl font-bold text-slate-100">Orbit</h1>
+                        <p className="text-xs text-slate-400">Executive Overview</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-xl font-bold text-slate-100">Orbit</h1>
-                    <p className="text-xs text-slate-400">Executive Overview</p>
+
+                {/* Year Selector */}
+                <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-lg border border-slate-800 overflow-x-auto">
+                    {YEARS.map((year) => (
+                        <button
+                            key={year}
+                            onClick={() => setSelectedYear(year)}
+                            className={cn(
+                                "px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap",
+                                selectedYear === year
+                                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
+                                    : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
+                            )}
+                        >
+                            {year}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -39,7 +64,11 @@ export function Orbit() {
                 {/* Price Chart - Takes 2 columns */}
                 <div className="lg:col-span-2 space-y-4 flex flex-col h-full">
                     <div className="flex-1">
-                        <PriceChart data={data} title="Bitcoin Price Action" height={500} />
+                        <PriceChart 
+                            data={data} 
+                            title={selectedYear === 'ALL' ? "Bitcoin Price Action (Last 365 Days)" : `Bitcoin Price Action (${selectedYear})`} 
+                            height={500} 
+                        />
                     </div>
 
                     {/* Technical Analysis Grid - Fills space below chart */}
@@ -88,7 +117,9 @@ export function Orbit() {
                                     <p className="text-3xl font-bold text-slate-100">
                                         ${(latest?.volume / 1e9).toFixed(1)}B
                                     </p>
-                                    <p className="text-xs text-slate-500 mt-1">24h Trading Volume</p>
+                                    <p className="text-xs text-slate-500 mt-1">
+                                        {selectedYear === 'ALL' ? '24h Trading Volume' : `Avg Volume (${selectedYear})`}
+                                    </p>
                                 </div>
                                 <div className="pt-4 border-t border-slate-800/50">
                                     <p className="text-sm font-medium text-slate-300">Market Liquidity</p>
@@ -113,20 +144,20 @@ export function Orbit() {
             {/* Bottom Stats Row - Compact */}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <StatCard
-                    label="52W High"
-                    value={`$${Math.max(...data.map((d) => d.high)).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-                    subtext="Yearly Max"
+                    label={selectedYear === 'ALL' ? "52W High" : `${selectedYear} High`}
+                    value={`$${data.length > 0 ? Math.max(...data.map((d) => d.high)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0'}`}
+                    subtext="Period Max"
                     color="text-emerald-500"
                 />
                 <StatCard
-                    label="52W Low"
-                    value={`$${Math.min(...data.map((d) => d.low)).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-                    subtext="Yearly Min"
+                    label={selectedYear === 'ALL' ? "52W Low" : `${selectedYear} Low`}
+                    value={`$${data.length > 0 ? Math.min(...data.map((d) => d.low)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0'}`}
+                    subtext="Period Min"
                     color="text-rose-500"
                 />
                 <StatCard
                     label="Avg Volume"
-                    value={`$${(data.reduce((sum, d) => sum + d.volume, 0) / data.length / 1e9).toFixed(1)}B`}
+                    value={`$${data.length > 0 ? (data.reduce((sum, d) => sum + d.volume, 0) / data.length / 1e9).toFixed(1) : '0'}B`}
                     subtext="Daily Avg"
                     color="text-blue-500"
                 />

@@ -12,7 +12,13 @@ interface UseBitcoinDataReturn {
     refetch: () => Promise<void>;
 }
 
-export function useBitcoinData(limit?: number): UseBitcoinDataReturn {
+export interface UseBitcoinDataOptions {
+    limit?: number;
+    year?: string | number;
+}
+
+export function useBitcoinData(options: UseBitcoinDataOptions = {}): UseBitcoinDataReturn {
+    const { limit, year } = options;
     const [data, setData] = useState<BitcoinData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -35,8 +41,17 @@ export function useBitcoinData(limit?: number): UseBitcoinDataReturn {
                 .select('*')
                 .order('date', { ascending: false });
 
-            if (limit) {
+            if (year && year !== 'ALL') {
+                const startDate = `${year}-01-01`;
+                const endDate = `${year}-12-31`;
+                query = query.gte('date', startDate).lte('date', endDate);
+            } else if (limit && !year) {
+                // Only apply limit if specific year is NOT selected (default view)
+                // If 'ALL' is selected, we might want to fetch everything (or a large limit)
                 query = query.limit(limit);
+            } else if (year === 'ALL') {
+                 // Fetch a reasonable amount of history for 'ALL' to avoid crashing
+                 query = query.limit(5000); 
             }
 
             const { data: fetchedData, error: fetchError } = await query;
@@ -56,7 +71,7 @@ export function useBitcoinData(limit?: number): UseBitcoinDataReturn {
         } finally {
             setLoading(false);
         }
-    }, [limit]);
+    }, [limit, year]);
 
     useEffect(() => {
         fetchData();

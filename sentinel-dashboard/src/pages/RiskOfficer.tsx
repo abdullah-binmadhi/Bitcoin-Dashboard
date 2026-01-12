@@ -7,7 +7,7 @@ import { formatPercent } from '@/lib/utils';
 import { useMemo } from 'react';
 
 export function RiskOfficer() {
-    const { data, latestData, loading } = useBitcoinData(365);
+    const { data, latestData, loading } = useBitcoinData({ limit: 365 });
 
     // Calculate risk metrics
     const riskMetrics = useMemo(() => {

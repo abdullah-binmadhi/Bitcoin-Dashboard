@@ -6,7 +6,7 @@ import { Wrench, TrendingUp, TrendingDown, Activity, Target } from 'lucide-react
 import { formatCurrency, formatNumber } from '@/lib/utils';
 
 export function Mechanic() {
-    const { data, latestData, loading } = useBitcoinData(365);
+    const { data, latestData, loading } = useBitcoinData({ limit: 365 });
 
     if (loading) {
         return (
