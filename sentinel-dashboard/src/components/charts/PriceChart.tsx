@@ -14,7 +14,7 @@ import type { BitcoinData } from '@/types/database';
 interface PriceChartProps {
     data: BitcoinData[];
     title?: string;
-    height?: number;
+    height?: number | `${number}%`;
 }
 
 interface TooltipPayload {
