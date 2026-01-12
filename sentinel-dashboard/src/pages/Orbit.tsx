@@ -2,7 +2,7 @@ import { useBitcoinData } from '@/hooks/useBitcoinData';
 import { KPIGrid } from '@/components/cards/KPICard';
 import { RecentActivity } from '@/components/cards/RecentActivity';
 import { PriceChart } from '@/components/charts/PriceChart';
-import { Orbit as OrbitIcon, TrendingUp, Activity, Waves, MoveVertical, Calendar } from 'lucide-react';
+import { Orbit as OrbitIcon, TrendingUp, Activity, Waves, MoveVertical } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
