@@ -76,24 +76,35 @@ export function Orbit() {
                 </div>
 
                 {/* Right Column: Activity & Volume Stats */}
-                <div className="lg:col-span-1 space-y-3">
+                <div className="lg:col-span-1 space-y-3 flex flex-col self-stretch">
                     <RecentActivity data={data} limit={7} maxHeight={340} />
 
-                    {/* Additional Volume Stat */}
-                    <Card className="p-3 bg-slate-900/50 border-slate-800">
-                        <h3 className="text-sm font-medium text-slate-400 mb-2">Volume Analysis</h3>
-                        <div className="flex items-end justify-between">
-                            <div>
-                                <p className="text-2xl font-bold text-slate-100">
-                                    ${(latest?.volume / 1e9).toFixed(1)}B
-                                </p>
-                                <p className="text-xs text-slate-500">24h Volume</p>
+                    {/* Additional Volume Stat - Now stretches to fill space */}
+                    <Card className="p-5 bg-slate-900/50 border-slate-800 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 className="text-sm font-medium text-slate-400 mb-4">Volume Analysis</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <p className="text-3xl font-bold text-slate-100">
+                                        ${(latest?.volume / 1e9).toFixed(1)}B
+                                    </p>
+                                    <p className="text-xs text-slate-500 mt-1">24h Trading Volume</p>
+                                </div>
+                                <div className="pt-4 border-t border-slate-800/50">
+                                    <p className="text-sm font-medium text-slate-300">Market Liquidity</p>
+                                    <p className="text-xs text-emerald-500 mt-1">High (Optimal)</p>
+                                </div>
                             </div>
-                            <div className="h-8 w-24 bg-slate-800 rounded-md flex items-end justify-around px-1 pb-1">
-                                {[40, 70, 45, 90, 60].map((h, i) => (
-                                    <div key={i} className="w-2 bg-emerald-500/50 rounded-sm" style={{ height: `${h}%` }} />
-                                ))}
-                            </div>
+                        </div>
+                        
+                        <div className="h-24 w-full bg-slate-800/30 rounded-xl flex items-end justify-around px-4 pb-2 mt-6">
+                            {[30, 60, 45, 80, 55, 90, 70, 40].map((h, i) => (
+                                <div 
+                                    key={i} 
+                                    className="w-3 bg-emerald-500/40 rounded-t-sm transition-all hover:bg-emerald-500" 
+                                    style={{ height: `${h}%` }} 
+                                />
+                            ))}
                         </div>
                     </Card>
                 </div>
