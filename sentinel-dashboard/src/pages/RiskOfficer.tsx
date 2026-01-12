@@ -83,6 +83,51 @@ export function RiskOfficer() {
         );
     }
 
+    if (!riskMetrics) {
+        return (
+            <div className="space-y-6">
+                {/* Page Header - Keep header so user can change year */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="rounded-xl bg-red-500/10 p-3">
+                            <Shield className="h-6 w-6 text-red-500" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-bold text-slate-100">Risk Officer</h1>
+                            <p className="text-sm text-slate-400">Drawdown & Volatility Analysis</p>
+                        </div>
+                    </div>
+
+                    {/* Year Selector */}
+                    <div className="flex items-center gap-1 bg-slate-900/50 p-1 rounded-lg border border-slate-800 overflow-x-auto">
+                        {YEARS.map((year) => (
+                            <button
+                                key={year}
+                                onClick={() => setSelectedYear(year)}
+                                className={cn(
+                                    "px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap",
+                                    selectedYear === year
+                                        ? "bg-red-500 text-white shadow-lg shadow-red-500/20"
+                                        : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
+                                )}
+                            >
+                                {year}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                
+                <Card className="flex flex-col items-center justify-center py-20 text-center border-dashed">
+                    <AlertTriangle className="h-12 w-12 text-amber-500 mb-4 opacity-20" />
+                    <h3 className="text-xl font-semibold text-slate-300">Insufficient Data</h3>
+                    <p className="text-slate-500 max-w-xs mt-2">
+                        Not enough data points found for {selectedYear} to calculate risk metrics. Please select another year.
+                    </p>
+                </Card>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6">
             {/* Page Header */}
@@ -120,28 +165,28 @@ export function RiskOfficer() {
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 <MetricCard
                     title="Current Drawdown"
-                    value={formatPercent(riskMetrics?.currentDrawdown || 0)}
+                    value={formatPercent(riskMetrics.currentDrawdown)}
                     subtitle="From ATH"
                     icon={<TrendingDown className="h-6 w-6" />}
-                    color={riskMetrics && riskMetrics.currentDrawdown > -10 ? 'emerald' : riskMetrics && riskMetrics.currentDrawdown > -30 ? 'orange' : 'rose'}
+                    color={riskMetrics.currentDrawdown > -10 ? 'emerald' : riskMetrics.currentDrawdown > -30 ? 'orange' : 'rose'}
                 />
                 <MetricCard
                     title={`Max Drawdown (${selectedYear})`}
-                    value={formatPercent(riskMetrics?.maxDrawdown || 0)}
+                    value={formatPercent(riskMetrics.maxDrawdown)}
                     subtitle="Worst case period"
                     icon={<AlertTriangle className="h-6 w-6" />}
                     color="rose"
                 />
                 <MetricCard
                     title="Daily Volatility"
-                    value={`${riskMetrics?.volatility.toFixed(2) || 0}%`}
-                    subtitle={`${riskMetrics?.annualizedVolatility.toFixed(0) || 0}% annualized`}
+                    value={`${riskMetrics.volatility.toFixed(2)}%`}
+                    subtitle={`${riskMetrics.annualizedVolatility.toFixed(0)}% annualized`}
                     icon={<Activity className="h-6 w-6" />}
                     color="purple"
                 />
                 <MetricCard
                     title="VaR (95%)"
-                    value={formatPercent(riskMetrics?.var95 || 0)}
+                    value={formatPercent(riskMetrics.var95)}
                     subtitle="Daily worst case"
                     icon={<BarChart3 className="h-6 w-6" />}
                     color="amber"
