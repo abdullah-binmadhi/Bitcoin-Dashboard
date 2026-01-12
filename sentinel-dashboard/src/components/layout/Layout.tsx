@@ -2,16 +2,19 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { useBitcoinData } from '@/hooks/useBitcoinData';
+import { useState } from 'react';
 
 export function Layout() {
     const { kpiData, loading } = useBitcoinData(365);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
         <div className="min-h-screen bg-slate-950 bg-grid">
-            <Sidebar />
-            <div className="ml-64 transition-all duration-300">
-                <Header kpiData={kpiData} />
-                <main className="p-6">
+            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+            
+            <div className="md:ml-64 transition-all duration-300 ml-0">
+                <Header kpiData={kpiData} onMenuClick={() => setSidebarOpen(true)} />
+                <main className="p-4 md:p-6">
                     {loading ? (
                         <div className="flex h-[calc(100vh-10rem)] items-center justify-center">
                             <div className="flex flex-col items-center gap-4">

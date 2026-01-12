@@ -35,11 +35,11 @@ export function Orbit() {
             <KPIGrid kpiData={kpiData} />
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 items-start">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 items-start">
                 {/* Price Chart - Takes 2 columns */}
-                <div className="lg:col-span-2 space-y-3 flex flex-col h-full">
-                    <div className="flex-1 min-h-[420px]">
-                        <PriceChart data={data} title="Bitcoin Price Action" height={420} />
+                <div className="lg:col-span-2 space-y-4 flex flex-col h-full">
+                    <div className="flex-1 min-h-[350px] md:min-h-[500px]">
+                        <PriceChart data={data} title="Bitcoin Price Action" height="100%" />
                     </div>
 
                     {/* Technical Analysis Grid - Fills space below chart */}
