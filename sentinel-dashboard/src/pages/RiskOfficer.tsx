@@ -148,7 +148,7 @@ export function RiskOfficer() {
                     <YearFilter 
                         selectedYear={selectedYear} 
                         onChange={setSelectedYear}
-                        startYear={selectedCoin === 'BTC' ? 2014 : 2015}
+                        startYear={getStartYear(selectedCoin)}
                     />
                 </div>
             </div>

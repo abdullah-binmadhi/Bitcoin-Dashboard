@@ -132,14 +132,6 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
             setLoading(false);
         }
     }, [limit, year, tableName, coin]);
-            console.error('Error fetching data:', err);
-            setError(err instanceof Error ? err.message : 'Failed to fetch data');
-            const mockData = generateMockData(limit || 365); // Fallback
-            setData(mockData);
-        } finally {
-            setLoading(false);
-        }
-    }, [limit, year, tableName, coin]);
 
     useEffect(() => {
         fetchData();
