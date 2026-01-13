@@ -86,10 +86,10 @@ export function Orbit() {
                         />
                         <TechCard
                             title="SMA Trend"
-                            value={latest?.close > (latest?.sma_200 || 0) ? 'Bullish' : 'Bearish'}
+                            value={latest?.sma_200 ? (latest.close > latest.sma_200 ? 'Bullish' : 'Bearish') : 'N/A'}
                             status="Long Term"
                             icon={<TrendingUp className="h-4 w-4" />}
-                            color={latest?.close > (latest?.sma_200 || 0) ? 'text-emerald-500' : 'text-rose-500'}
+                            color={latest?.sma_200 ? (latest.close > latest.sma_200 ? 'text-emerald-500' : 'text-rose-500') : 'text-slate-400'}
                         />
                         <TechCard
                             title="Daily Range"
