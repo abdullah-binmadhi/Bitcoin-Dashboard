@@ -48,7 +48,7 @@ export function Orbit() {
                     <YearFilter 
                         selectedYear={selectedYear} 
                         onChange={setSelectedYear} 
-                        startYear={selectedCoin === 'BTC' ? 2014 : 2025}
+                        startYear={selectedCoin === 'BTC' ? 2014 : 2015}
                     />
                 </div>
             </div>
