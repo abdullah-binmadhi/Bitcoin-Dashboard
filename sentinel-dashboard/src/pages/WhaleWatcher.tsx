@@ -168,8 +168,9 @@ export function WhaleWatcher() {
                                         ))}
                                     </Pie>
                                     <Tooltip 
-                                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155' }}
-                                        itemStyle={{ fontSize: '12px' }}
+                                        contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px', border: '1px solid #334155' }}
+                                        itemStyle={{ color: '#f1f5f9', fontSize: '12px' }}
+                                        labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
                                     />
                                     <Legend verticalAlign="bottom" height={36} iconSize={8} wrapperStyle={{ fontSize: '11px' }} />
                                 </PieChart>
@@ -193,8 +194,10 @@ export function WhaleWatcher() {
                                     <XAxis type="number" hide />
                                     <YAxis dataKey="name" type="category" width={60} tick={{ fill: '#94a3b8', fontSize: 11 }} />
                                     <Tooltip 
-                                        cursor={{fill: 'transparent'}}
-                                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155' }}
+                                        cursor={{fill: 'rgba(255, 255, 255, 0.05)'}}
+                                        contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px', border: '1px solid #334155' }}
+                                        itemStyle={{ color: '#f1f5f9', fontSize: '12px' }}
+                                        labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
                                         formatter={(val: any) => [`$${formatNumber(val || 0, 0)}`, 'Volume']}
                                     />
                                     <Bar dataKey="value" radius={[0, 4, 4, 0]}>
