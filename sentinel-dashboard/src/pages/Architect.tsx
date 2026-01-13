@@ -1,8 +1,10 @@
 import { useCryptoData } from '@/hooks/useBitcoinData';
 import { MACDChart } from '@/components/charts/MACDChart';
 import { FibRetracementChart } from '@/components/charts/FibRetracementChart';
+import { OBVChart } from '@/components/charts/OBVChart';
+import { VolumeProfileChart } from '@/components/charts/VolumeProfileChart';
 import { Card, CardContent } from '@/components/ui/card';
-import { Compass, TrendingUp, Layers } from 'lucide-react';
+import { Compass, TrendingUp, Layers, BarChart2, Activity } from 'lucide-react';
 import { useState } from 'react';
 import { YearFilter } from '@/components/ui/YearFilter';
 import { CoinSelector } from '@/components/ui/CoinSelector';
@@ -35,7 +37,7 @@ export function Architect() {
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold text-slate-100">The Architect</h1>
-                        <p className="text-sm text-slate-400">Advanced Structure & Momentum</p>
+                        <p className="text-sm text-slate-400">Advanced Pattern Recognition</p>
                     </div>
                 </div>
 
@@ -49,35 +51,48 @@ export function Architect() {
                 </div>
             </div>
 
-            {/* Analysis Grid */}
-            <div className="grid gap-6 lg:grid-cols-2">
-                {/* MACD Section */}
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-slate-400 text-sm">
-                        <TrendingUp className="h-4 w-4" />
-                        <span>Momentum Oscillator</span>
+            {/* Row 1: Momentum (MACD) */}
+            <div className="space-y-2">
+                <div className="flex items-center gap-2 text-slate-400 text-sm px-1">
+                    <TrendingUp className="h-4 w-4 text-emerald-500" />
+                    <span className="font-medium text-slate-300">Momentum Structure</span>
+                </div>
+                <MACDChart data={data} height={300} />
+            </div>
+
+            {/* Row 2: Structure (Fibonacci + Volume Profile) */}
+            <div className="grid gap-6 lg:grid-cols-3">
+                {/* Fibonacci (2/3) */}
+                <div className="lg:col-span-2 space-y-2">
+                    <div className="flex items-center gap-2 text-slate-400 text-sm px-1">
+                        <Layers className="h-4 w-4 text-blue-500" />
+                        <span className="font-medium text-slate-300">Retracement Levels</span>
                     </div>
-                    <MACDChart data={data} />
-                    <Card className="bg-slate-900/50 border-slate-800">
-                        <CardContent className="p-4 text-xs text-slate-400">
-                            <strong className="text-slate-300">Interpretation:</strong> When the MACD line (Blue) crosses above the Signal line (Orange), it's a bullish signal. A cross below indicates bearish momentum. The Histogram shows the strength of the move.
-                        </CardContent>
-                    </Card>
+                    <FibRetracementChart data={data} height={400} />
                 </div>
 
-                {/* Fibonacci Section */}
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-slate-400 text-sm">
-                        <Layers className="h-4 w-4" />
-                        <span>Structural Levels</span>
+                {/* Volume Profile (1/3) */}
+                <div className="lg:col-span-1 space-y-2">
+                    <div className="flex items-center gap-2 text-slate-400 text-sm px-1">
+                        <BarChart2 className="h-4 w-4 text-amber-500" />
+                        <span className="font-medium text-slate-300">Volume Profile (VPVR)</span>
                     </div>
-                    <FibRetracementChart data={data} />
-                    <Card className="bg-slate-900/50 border-slate-800">
-                        <CardContent className="p-4 text-xs text-slate-400">
-                            <strong className="text-slate-300">Key Levels:</strong> The <span className="text-blue-400">61.8%</span> level ("Golden Ratio") is often a critical support/resistance zone. Use these lines to identify potential reversal points during corrections.
-                        </CardContent>
-                    </Card>
+                    <VolumeProfileChart data={data} height={400} />
                 </div>
+            </div>
+
+            {/* Row 3: Smart Money Flow (OBV) */}
+            <div className="space-y-2">
+                <div className="flex items-center gap-2 text-slate-400 text-sm px-1">
+                    <Activity className="h-4 w-4 text-purple-500" />
+                    <span className="font-medium text-slate-300">Smart Money Flow (OBV)</span>
+                </div>
+                <OBVChart data={data} height={300} />
+                <Card className="bg-slate-900/50 border-slate-800">
+                    <CardContent className="p-4 text-xs text-slate-400">
+                        <strong className="text-slate-300">Signal:</strong> Divergence between Price and OBV often precedes a reversal. If Price is making Lower Lows but OBV is making Higher Lows, accumulation is occurring.
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );
