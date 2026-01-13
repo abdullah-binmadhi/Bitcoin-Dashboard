@@ -6,6 +6,16 @@
         "mcp-remote",
         "https://mcp.api.coingecko.com/mcp"
       ]
+    },
+    "firecrawl": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "firecrawl-mcp"
+      ],
+      "env": {
+        "FIRECRAWL_API_KEY": "fc-d13bfa5cc9bd45b391dd55031be2ba81"
+      }
     }
   }
 }
