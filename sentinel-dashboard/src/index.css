@@ -200,3 +200,21 @@ body {
     linear-gradient(90deg, oklch(0.99 0 0 / 3%) 1px, transparent 1px);
   background-size: 50px 50px;
 }
+
+/* Ticker Tape Marquee Animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.33%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}

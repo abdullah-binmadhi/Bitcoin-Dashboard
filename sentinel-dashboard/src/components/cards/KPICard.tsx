@@ -1,8 +1,6 @@
 import { cn, formatCurrency, formatPercent, getFearGreedStatus, getTrendStatus } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import {
-    TrendingUp,
-    TrendingDown,
     Activity,
     Target,
     BarChart3,
@@ -13,7 +11,7 @@ interface KPICardProps {
     title: string;
     value: string;
     subtitle?: string;
-    icon: React.ReactNode;
+    icon?: React.ReactNode;
     trend?: 'up' | 'down' | 'neutral';
     gradientClass?: string;
     glowClass?: string;
@@ -56,16 +54,18 @@ function KPICard({
                             <span className="text-sm text-slate-400">{subtitle}</span>
                         )}
                     </div>
-                    <div
-                        className={cn(
-                            'rounded-xl p-3',
-                            trend === 'up' && 'bg-emerald-500/10 text-emerald-500',
-                            trend === 'down' && 'bg-rose-500/10 text-rose-500',
-                            trend === 'neutral' && 'bg-slate-500/10 text-slate-400'
-                        )}
-                    >
-                        {icon}
-                    </div>
+                    {icon && (
+                        <div
+                            className={cn(
+                                'rounded-xl p-3',
+                                trend === 'up' && 'bg-emerald-500/10 text-emerald-500',
+                                trend === 'down' && 'bg-rose-500/10 text-rose-500',
+                                trend === 'neutral' && 'bg-slate-500/10 text-slate-400'
+                            )}
+                        >
+                            {icon}
+                        </div>
+                    )}
                 </div>
             </div>
             {/* Decorative gradient orb */}
@@ -107,7 +107,6 @@ export function KPIGrid({ kpiData }: KPIGridProps) {
                 title="Current Price"
                 value={formatCurrency(kpiData.price)}
                 subtitle={formatPercent(kpiData.priceChangePercent)}
-                icon={isPositive ? <TrendingUp className="h-6 w-6" /> : <TrendingDown className="h-6 w-6" />}
                 trend={isPositive ? 'up' : 'down'}
             />
 

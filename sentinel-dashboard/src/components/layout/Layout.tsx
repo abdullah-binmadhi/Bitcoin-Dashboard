@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { TickerTape } from './TickerTape';
 import { useCryptoData } from '@/hooks/useBitcoinData';
 import { useState } from 'react';
 
@@ -11,9 +12,10 @@ export function Layout() {
     return (
         <div className="min-h-screen bg-slate-950 bg-grid">
             <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-            
+
             <div className="md:ml-64 transition-all duration-300 ml-0">
                 <Header onMenuClick={() => setSidebarOpen(true)} />
+                <TickerTape />
                 <main className="p-4 md:p-6">
                     {loading ? (
                         <div className="flex h-[calc(100vh-10rem)] items-center justify-center">
