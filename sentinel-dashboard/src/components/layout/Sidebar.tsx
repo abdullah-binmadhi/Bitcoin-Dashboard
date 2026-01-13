@@ -9,7 +9,8 @@ import {
     Settings,
     ChevronLeft,
     ChevronRight,
-    X
+    X,
+    Compass
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -32,6 +33,12 @@ const navItems: NavItem[] = [
         icon: Wrench,
         label: 'The Mechanic',
         description: 'Technical Analysis',
+    },
+    {
+        to: '/architect',
+        icon: Compass,
+        label: 'The Architect',
+        description: 'Advanced Patterns',
     },
     {
         to: '/risk-officer',
