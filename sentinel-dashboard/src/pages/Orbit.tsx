@@ -45,7 +45,11 @@ export function Orbit() {
                 {/* Selectors */}
                 <div className="flex items-center gap-3">
                     <CoinSelector selectedCoin={selectedCoin} onChange={setSelectedCoin} />
-                    <YearFilter selectedYear={selectedYear} onChange={setSelectedYear} />
+                    <YearFilter 
+                        selectedYear={selectedYear} 
+                        onChange={setSelectedYear} 
+                        startYear={selectedCoin === 'BTC' ? 2014 : 2025}
+                    />
                 </div>
             </div>
 
