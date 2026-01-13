@@ -1,4 +1,4 @@
-import { useBitcoinData } from '@/hooks/useBitcoinData';
+import { useCryptoData } from '@/hooks/useBitcoinData';
 import { BollingerChart } from '@/components/charts/BollingerChart';
 import { RSIChart } from '@/components/charts/RSIChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,10 +6,17 @@ import { Wrench, TrendingUp, TrendingDown, Activity, Target } from 'lucide-react
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import { useState } from 'react';
 import { YearFilter } from '@/components/ui/YearFilter';
+import { CoinSelector } from '@/components/ui/CoinSelector';
 
 export function Mechanic() {
     const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
-    const { data, latestData, loading } = useBitcoinData({ year: selectedYear, limit: selectedYear === 'ALL' ? undefined : undefined });
+    const [selectedCoin, setSelectedCoin] = useState<'BTC' | 'ETH'>('BTC');
+    
+    const { data, latestData, loading } = useCryptoData({ 
+        year: selectedYear, 
+        limit: selectedYear === 'ALL' ? undefined : undefined,
+        coin: selectedCoin
+    });
 
     if (loading) {
         return (
@@ -46,8 +53,11 @@ export function Mechanic() {
                     </div>
                 </div>
 
-                {/* Year Selector */}
-                <YearFilter selectedYear={selectedYear} onChange={setSelectedYear} />
+                {/* Selectors */}
+                <div className="flex items-center gap-3">
+                    <CoinSelector selectedCoin={selectedCoin} onChange={setSelectedCoin} />
+                    <YearFilter selectedYear={selectedYear} onChange={setSelectedYear} />
+                </div>
             </div>
 
             {/* Technical Indicator Summary Cards */}

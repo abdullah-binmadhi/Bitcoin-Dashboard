@@ -3,7 +3,7 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { BitcoinData, KPIData } from '@/types/database';
 import { generateMockData } from '@/lib/mockData';
 
-interface UseBitcoinDataReturn {
+interface UseCryptoDataReturn {
     data: BitcoinData[];
     latestData: BitcoinData | null;
     kpiData: KPIData | null;
@@ -12,16 +12,19 @@ interface UseBitcoinDataReturn {
     refetch: () => Promise<void>;
 }
 
-export interface UseBitcoinDataOptions {
+export interface UseCryptoDataOptions {
     limit?: number;
     year?: string | number;
+    coin?: 'BTC' | 'ETH';
 }
 
-export function useBitcoinData(options: UseBitcoinDataOptions = {}): UseBitcoinDataReturn {
-    const { limit, year } = options;
+export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoDataReturn {
+    const { limit, year, coin = 'BTC' } = options;
     const [data, setData] = useState<BitcoinData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const tableName = coin === 'ETH' ? 'ethereum_data' : 'bitcoin_data';
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -29,14 +32,29 @@ export function useBitcoinData(options: UseBitcoinDataOptions = {}): UseBitcoinD
 
         if (!isSupabaseConfigured) {
             // Use mock data in demo mode
-            let mockData = generateMockData(limit || 365 * 2); // Generate more history for filtering
+            let mockData = generateMockData(limit || 365 * 2);
             
-            // Apply filtering to mock data too
+            // Apply filtering
             if (year && year !== 'ALL') {
                 const yearStr = year.toString();
                 mockData = mockData.filter(d => d.date.startsWith(yearStr));
             } else if (limit && !year) {
-                mockData = mockData.slice(-limit); // Keep last N days
+                mockData = mockData.slice(-limit);
+            }
+
+            // Simulate different prices for ETH (just divide by 20 for mock)
+            if (coin === 'ETH') {
+                mockData = mockData.map(d => ({
+                    ...d,
+                    close: d.close / 20,
+                    high: d.high / 20,
+                    low: d.low / 20,
+                    open: d.open / 20,
+                    sma_50: d.sma_50 ? d.sma_50 / 20 : null,
+                    sma_200: d.sma_200 ? d.sma_200 / 20 : null,
+                    bb_upper: d.bb_upper ? d.bb_upper / 20 : null,
+                    bb_lower: d.bb_lower ? d.bb_lower / 20 : null,
+                }));
             }
 
             setData(mockData);
@@ -46,7 +64,7 @@ export function useBitcoinData(options: UseBitcoinDataOptions = {}): UseBitcoinD
 
         try {
             let query = supabase
-                .from('bitcoin_data')
+                .from(tableName)
                 .select('*')
                 .order('date', { ascending: false });
 
@@ -55,11 +73,8 @@ export function useBitcoinData(options: UseBitcoinDataOptions = {}): UseBitcoinD
                 const endDate = `${year}-12-31`;
                 query = query.gte('date', startDate).lte('date', endDate);
             } else if (limit && !year) {
-                // Only apply limit if specific year is NOT selected (default view)
-                // If 'ALL' is selected, we might want to fetch everything (or a large limit)
                 query = query.limit(limit);
             } else if (year === 'ALL') {
-                 // Fetch a reasonable amount of history for 'ALL' to avoid crashing
                  query = query.limit(5000); 
             }
 
@@ -69,18 +84,16 @@ export function useBitcoinData(options: UseBitcoinDataOptions = {}): UseBitcoinD
                 throw fetchError;
             }
 
-            // Reverse to get chronological order
-            setData((fetchedData || []).reverse());
+            setData((fetchedData || []).reverse() as BitcoinData[]);
         } catch (err) {
             console.error('Error fetching data:', err);
             setError(err instanceof Error ? err.message : 'Failed to fetch data');
-            // Fallback to mock data on error
-            const mockData = generateMockData(limit || 365);
+            const mockData = generateMockData(limit || 365); // Fallback
             setData(mockData);
         } finally {
             setLoading(false);
         }
-    }, [limit, year]);
+    }, [limit, year, tableName, coin]);
 
     useEffect(() => {
         fetchData();
@@ -89,23 +102,19 @@ export function useBitcoinData(options: UseBitcoinDataOptions = {}): UseBitcoinD
             return;
         }
 
-        // Set up realtime subscription
         const channel = supabase
-            .channel('bitcoin_data_changes')
+            .channel(`${tableName}_changes`)
             .on(
                 'postgres_changes',
                 {
                     event: '*',
                     schema: 'public',
-                    table: 'bitcoin_data',
+                    table: tableName,
                 },
                 (payload) => {
-                    console.log('Realtime update:', payload);
-
                     if (payload.eventType === 'INSERT') {
                         setData((prev) => {
                             const newRow = payload.new as BitcoinData;
-                            // Add new row and keep chronological order
                             return [...prev, newRow].sort(
                                 (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
                             );
@@ -130,13 +139,12 @@ export function useBitcoinData(options: UseBitcoinDataOptions = {}): UseBitcoinD
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [fetchData]);
+    }, [fetchData, tableName]);
 
-    // Get latest data point
+    // ... Rest of calculations (KPIs) remain generic ...
     const latestData = data.length > 0 ? data[data.length - 1] : null;
     const previousData = data.length > 1 ? data[data.length - 2] : null;
 
-    // Calculate KPI data
     const kpiData: KPIData | null = latestData
         ? {
             price: latestData.close,

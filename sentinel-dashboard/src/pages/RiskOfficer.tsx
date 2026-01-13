@@ -1,4 +1,4 @@
-import { useBitcoinData } from '@/hooks/useBitcoinData';
+import { useCryptoData } from '@/hooks/useBitcoinData';
 import { DrawdownChart } from '@/components/charts/DrawdownChart';
 import { HistogramChart } from '@/components/charts/HistogramChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,10 +6,17 @@ import { Shield, AlertTriangle, TrendingDown, BarChart3, Activity } from 'lucide
 import { formatPercent } from '@/lib/utils';
 import { useMemo, useState } from 'react';
 import { YearFilter } from '@/components/ui/YearFilter';
+import { CoinSelector } from '@/components/ui/CoinSelector';
 
 export function RiskOfficer() {
     const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
-    const { data, latestData, loading } = useBitcoinData({ year: selectedYear, limit: selectedYear === 'ALL' ? undefined : undefined });
+    const [selectedCoin, setSelectedCoin] = useState<'BTC' | 'ETH'>('BTC');
+    
+    const { data, latestData, loading } = useCryptoData({ 
+        year: selectedYear, 
+        limit: selectedYear === 'ALL' ? undefined : undefined,
+        coin: selectedCoin
+    });
 
     // Calculate risk metrics
     const riskMetrics = useMemo(() => {
@@ -97,8 +104,11 @@ export function RiskOfficer() {
                         </div>
                     </div>
 
-                    {/* Year Selector */}
-                    <YearFilter selectedYear={selectedYear} onChange={setSelectedYear} />
+                    {/* Selectors */}
+                    <div className="flex items-center gap-3">
+                        <CoinSelector selectedCoin={selectedCoin} onChange={setSelectedCoin} />
+                        <YearFilter selectedYear={selectedYear} onChange={setSelectedYear} />
+                    </div>
                 </div>
                 
                 <Card className="flex flex-col items-center justify-center py-20 text-center border-dashed">
@@ -126,8 +136,11 @@ export function RiskOfficer() {
                     </div>
                 </div>
 
-                {/* Year Selector */}
-                <YearFilter selectedYear={selectedYear} onChange={setSelectedYear} />
+                {/* Selectors */}
+                <div className="flex items-center gap-3">
+                    <CoinSelector selectedCoin={selectedCoin} onChange={setSelectedCoin} />
+                    <YearFilter selectedYear={selectedYear} onChange={setSelectedYear} />
+                </div>
             </div>
 
             {/* Risk Metrics Grid */}

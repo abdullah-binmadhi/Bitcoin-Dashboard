@@ -1,4 +1,4 @@
-import { useBitcoinData } from '@/hooks/useBitcoinData';
+import { useCryptoData } from '@/hooks/useBitcoinData';
 import { KPIGrid } from '@/components/cards/KPICard';
 import { RecentActivity } from '@/components/cards/RecentActivity';
 import { PriceChart } from '@/components/charts/PriceChart';
@@ -6,10 +6,17 @@ import { Orbit as OrbitIcon, TrendingUp, Activity, Waves, MoveVertical } from 'l
 import { Card } from '@/components/ui/card';
 import { useState } from 'react';
 import { YearFilter } from '@/components/ui/YearFilter';
+import { CoinSelector } from '@/components/ui/CoinSelector';
 
 export function Orbit() {
     const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
-    const { data, kpiData, loading } = useBitcoinData({ year: selectedYear, limit: selectedYear === 'ALL' ? undefined : undefined });
+    const [selectedCoin, setSelectedCoin] = useState<'BTC' | 'ETH'>('BTC');
+    
+    const { data, kpiData, loading } = useCryptoData({ 
+        year: selectedYear, 
+        limit: selectedYear === 'ALL' ? undefined : undefined,
+        coin: selectedCoin 
+    });
 
     if (loading) {
         return (
@@ -23,7 +30,7 @@ export function Orbit() {
 
     return (
         <div className="space-y-3 max-w-[1920px] mx-auto">
-            {/* Page Header - Compact with Year Filter */}
+            {/* Page Header - Compact with Filters */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-1">
                 <div className="flex items-center gap-3">
                     <div className="rounded-xl bg-emerald-500/10 p-2">
@@ -35,8 +42,11 @@ export function Orbit() {
                     </div>
                 </div>
 
-                {/* Year Selector */}
-                <YearFilter selectedYear={selectedYear} onChange={setSelectedYear} />
+                {/* Selectors */}
+                <div className="flex items-center gap-3">
+                    <CoinSelector selectedCoin={selectedCoin} onChange={setSelectedCoin} />
+                    <YearFilter selectedYear={selectedYear} onChange={setSelectedYear} />
+                </div>
             </div>
 
             {/* KPI Grid - Top Stats */}
@@ -49,7 +59,7 @@ export function Orbit() {
                     <div className="flex-1">
                         <PriceChart 
                             data={data} 
-                            title={selectedYear === 'ALL' ? "Bitcoin Price Action (Last 365 Days)" : `Bitcoin Price Action (${selectedYear})`} 
+                            title={`${selectedCoin} Price Action ${selectedYear === 'ALL' ? "(Last 365 Days)" : `(${selectedYear})`}`} 
                             height={500} 
                         />
                     </div>

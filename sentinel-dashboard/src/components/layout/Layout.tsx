@@ -1,11 +1,11 @@
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
-import { useBitcoinData } from '@/hooks/useBitcoinData';
+import { useCryptoData } from '@/hooks/useBitcoinData';
 import { useState } from 'react';
 
 export function Layout() {
-    const { kpiData, loading } = useBitcoinData({ limit: 365 });
+    const { kpiData, loading } = useCryptoData({ limit: 365 });
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
