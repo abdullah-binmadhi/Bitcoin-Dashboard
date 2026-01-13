@@ -1,16 +1,33 @@
 import { useState, useMemo } from 'react';
-import { Newspaper, Flame, Hash } from 'lucide-react';
+import { Newspaper, Flame, Hash, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { NewsCard, type NewsItem } from '@/components/cards/NewsCard';
 
-const MOCK_NEWS: NewsItem[] = [
-    { id: '1', title: "Bitcoin Surges Past $90k as Institutional Demand Grows", source: "CoinDesk", published_at: new Date().toISOString(), url: "#", sentiment: 'bullish', score: 85 },
-    { id: '2', title: "SEC Delays Decision on Ethereum ETF Applications", source: "The Block", published_at: new Date(Date.now() - 3600000).toISOString(), url: "#", sentiment: 'bearish', score: 60 },
-    { id: '3', title: "Solana Network Experiences Brief Congestion", source: "Decrypt", published_at: new Date(Date.now() - 7200000).toISOString(), url: "#", sentiment: 'neutral', score: 45 },
-    { id: '4', title: "Ripple Wins Another Legal Battle in ongoing Lawsuit", source: "CryptoSlate", published_at: new Date(Date.now() - 10800000).toISOString(), url: "#", sentiment: 'bullish', score: 92 },
-    { id: '5', title: "Crypto Market Analysis: Week Ahead", source: "CoinTelegraph", published_at: new Date(Date.now() - 14400000).toISOString(), url: "#", sentiment: 'neutral', score: 50 },
-    { id: '6', title: "Whales Accumulating BTC at Record Pace", source: "Glassnode", published_at: new Date(Date.now() - 86400000).toISOString(), url: "#", sentiment: 'bullish', score: 88 },
-];
+// Generate more realistic mock news
+const SOURCES = ['CoinDesk', 'The Block', 'Decrypt', 'CoinTelegraph', 'CryptoSlate', 'Bloomberg Crypto', 'Reuters'];
+const TOPICS = ['Bitcoin', 'Ethereum', 'Solana', 'XRP', 'Regulation', 'DeFi', 'NFTs', 'Mining', 'ETF'];
+const SENTIMENTS: ('bullish' | 'bearish' | 'neutral')[] = ['bullish', 'bearish', 'neutral', 'bullish', 'neutral'];
+
+const generateNews = (count: number): NewsItem[] => {
+    return Array.from({ length: count }, (_, i) => {
+        const topic = TOPICS[i % TOPICS.length];
+        const source = SOURCES[i % SOURCES.length];
+        const sentiment = SENTIMENTS[i % SENTIMENTS.length];
+        const timeOffset = i * 3600000 * (Math.random() * 2); // Spread over time
+        
+        return {
+            id: `news-${i}`,
+            title: `${topic} ${sentiment === 'bullish' ? 'Soars' : sentiment === 'bearish' ? 'Plummets' : 'Stabilizes'} as Market Reacts to ${source} Report on Global Trends`,
+            source,
+            published_at: new Date(Date.now() - timeOffset).toISOString(),
+            url: `https://www.google.com/search?q=${topic}+crypto+news`, // Functional search link as placeholder
+            sentiment,
+            score: Math.floor(Math.random() * 40) + 50
+        };
+    });
+};
+
+const MOCK_NEWS = generateNews(60);
 
 const TRENDING_TOPICS = [
     { tag: 'Bitcoin ETF', count: 124 },
@@ -21,16 +38,34 @@ const TRENDING_TOPICS = [
     { tag: 'ZK-Rollups', count: 45 },
 ];
 
+const ITEMS_PER_PAGE = 10;
+
 export function Newsroom() {
     const [filter, setFilter] = useState<'all' | 'bullish' | 'bearish'>('all');
+    const [currentPage, setCurrentPage] = useState(1);
 
     const filteredNews = useMemo(() => {
-        if (filter === 'all') return MOCK_NEWS;
-        return MOCK_NEWS.filter(n => n.sentiment === filter);
+        let news = MOCK_NEWS;
+        if (filter !== 'all') {
+            news = MOCK_NEWS.filter(n => n.sentiment === filter);
+        }
+        return news.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
     }, [filter]);
 
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredNews.length / ITEMS_PER_PAGE);
+    const paginatedNews = filteredNews.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
+
+    const handleFilterChange = (f: 'all' | 'bullish' | 'bearish') => {
+        setFilter(f);
+        setCurrentPage(1); // Reset to page 1 on filter change
+    };
+
     return (
-        <div className="space-y-6 max-w-[1920px] mx-auto">
+        <div className="space-y-6 max-w-[1920px] mx-auto pb-8">
             {/* Header */}
             <div className="flex items-center gap-3">
                 <div className="rounded-xl bg-blue-500/10 p-3">
@@ -45,7 +80,7 @@ export function Newsroom() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Feed - Left Column (2/3) */}
                 <div className="lg:col-span-2 space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between bg-slate-900/50 p-3 rounded-xl border border-slate-800">
                         <h2 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
                             <Flame className="h-5 w-5 text-orange-500" />
                             Latest Headlines
@@ -54,10 +89,10 @@ export function Newsroom() {
                             {['all', 'bullish', 'bearish'].map((f) => (
                                 <button
                                     key={f}
-                                    onClick={() => setFilter(f as any)}
+                                    onClick={() => handleFilterChange(f as any)}
                                     className={`px-3 py-1 text-xs rounded-full capitalize transition-colors ${
                                         filter === f 
-                                        ? 'bg-slate-700 text-white' 
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
                                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                                     }`}
                                 >
@@ -67,11 +102,34 @@ export function Newsroom() {
                         </div>
                     </div>
 
-                    <div className="grid gap-3">
-                        {filteredNews.map(item => (
+                    <div className="grid gap-3 min-h-[600px]">
+                        {paginatedNews.map(item => (
                             <NewsCard key={item.id} item={item} />
                         ))}
                     </div>
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-center gap-4 pt-4 border-t border-slate-800">
+                            <button
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                disabled={currentPage === 1}
+                                className="p-2 rounded-lg text-slate-400 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ChevronLeft className="h-5 w-5" />
+                            </button>
+                            <span className="text-sm text-slate-400">
+                                Page <span className="text-slate-100 font-medium">{currentPage}</span> of {totalPages}
+                            </span>
+                            <button
+                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                disabled={currentPage === totalPages}
+                                className="p-2 rounded-lg text-slate-400 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ChevronRight className="h-5 w-5" />
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Sidebar - Right Column (1/3) */}
@@ -113,7 +171,7 @@ export function Newsroom() {
                                 <div className="h-full bg-gradient-to-r from-rose-500 via-yellow-500 to-emerald-500 w-[78%]" />
                             </div>
                             <p className="text-xs text-center text-slate-500 mt-2">
-                                Based on analysis of 500+ news articles today.
+                                Based on analysis of {MOCK_NEWS.length} articles.
                             </p>
                         </CardContent>
                     </Card>
