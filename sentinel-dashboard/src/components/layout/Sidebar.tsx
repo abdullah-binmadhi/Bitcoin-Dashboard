@@ -10,7 +10,9 @@ import {
     ChevronLeft,
     ChevronRight,
     X,
-    Compass
+    Compass,
+    Newspaper,
+    Ship
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -45,6 +47,18 @@ const navItems: NavItem[] = [
         icon: Shield,
         label: 'Risk Officer',
         description: 'Drawdown Analysis',
+    },
+    {
+        to: '/newsroom',
+        icon: Newspaper,
+        label: 'The Newsroom',
+        description: 'Market Sentiment',
+    },
+    {
+        to: '/whale-watcher',
+        icon: Ship,
+        label: 'Whale Watcher',
+        description: 'On-Chain Flow',
     },
 ];
 
