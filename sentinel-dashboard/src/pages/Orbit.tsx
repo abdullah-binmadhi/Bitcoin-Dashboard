@@ -28,36 +28,6 @@ export function Orbit() {
 
     const latest = data[data.length - 1];
 
-import { useCryptoData } from '@/hooks/useBitcoinData';
-import { KPIGrid } from '@/components/cards/KPICard';
-import { RecentActivity } from '@/components/cards/RecentActivity';
-import { PriceChart } from '@/components/charts/PriceChart';
-import { Orbit as OrbitIcon, TrendingUp, Activity, Waves, MoveVertical } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { useState } from 'react';
-import { YearFilter } from '@/components/ui/YearFilter';
-import { CoinSelector } from '@/components/ui/CoinSelector';
-
-export function Orbit() {
-    const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
-    const [selectedCoin, setSelectedCoin] = useState<'BTC' | 'ETH'>('BTC');
-    
-    const { data, kpiData, loading } = useCryptoData({ 
-        year: selectedYear, 
-        limit: selectedYear === 'ALL' ? undefined : undefined,
-        coin: selectedCoin 
-    });
-
-    if (loading) {
-        return (
-            <div className="flex h-[calc(100vh-10rem)] items-center justify-center">
-                <div className="animate-spin h-8 w-8 border-4 border-slate-700 border-t-emerald-500 rounded-full" />
-            </div>
-        );
-    }
-
-    const latest = data[data.length - 1];
-
     return (
         <div className="space-y-6 max-w-[1920px] mx-auto pb-8">
             {/* Header & Controls */}
@@ -227,36 +197,6 @@ function StatCard({ label, value, subtext, color }: StatCardProps) {
             <p className="text-xs text-slate-500 uppercase tracking-wider">{label}</p>
             <p className={`text-2xl font-bold ${color} tabular-nums mt-1`}>{value}</p>
             <p className="text-xs text-slate-400">{subtext}</p>
-        </div>
-    );
-}
-
-function TechCard({ title, value, status, icon, color }: { title: string, value: string, status: string, icon: React.ReactNode, color: string }) {
-    return (
-        <Card className="p-4 bg-slate-900/40 border-slate-800 hover:bg-slate-800/60 transition-colors">
-            <div className="flex items-center gap-2 mb-2 text-slate-400">
-                {icon}
-                <span className="text-xs font-medium">{title}</span>
-            </div>
-            <div className="text-lg font-bold text-slate-100">{value}</div>
-            <div className={`text-xs ${color} font-medium`}>{status}</div>
-        </Card>
-    );
-}
-
-interface StatCardProps {
-    label: string;
-    value: string;
-    subtext: string;
-    color: string;
-}
-
-function StatCard({ label, value, subtext, color }: StatCardProps) {
-    return (
-        <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider">{label}</p>
-            <p className={`text-lg font-bold ${color} tabular-nums mt-0.5`}>{value}</p>
-            <p className="text-[10px] text-slate-400">{subtext}</p>
         </div>
     );
 }
