@@ -15,7 +15,7 @@ interface UseCryptoDataReturn {
 export interface UseCryptoDataOptions {
     limit?: number;
     year?: string | number;
-    coin?: 'BTC' | 'ETH';
+    coin?: 'BTC' | 'ETH' | 'XRP' | 'SOL';
 }
 
 export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoDataReturn {
@@ -24,17 +24,25 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const tableName = coin === 'ETH' ? 'ethereum_data' : 'bitcoin_data';
+    const getTableName = (c: string) => {
+        switch (c) {
+            case 'ETH': return 'ethereum_data';
+            case 'XRP': return 'xrp_data';
+            case 'SOL': return 'solana_data';
+            default: return 'bitcoin_data';
+        }
+    };
+
+    const tableName = getTableName(coin);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         setError(null);
         
-        console.log('Fetching Data with:', { year, limit, coin, isConfigured: isSupabaseConfigured });
+        console.log('Fetching Data with:', { year, limit, coin, tableName, isConfigured: isSupabaseConfigured });
 
         if (!isSupabaseConfigured) {
             // Use mock data in demo mode
-            // Generate 15 years of history to cover 2014-2029
             let mockData = generateMockData(365 * 15); 
             
             // Apply filtering
@@ -45,24 +53,25 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
                 mockData = mockData.slice(-limit);
             }
 
-            // Simulate different prices for ETH (just divide by 20 for mock)
-            if (coin === 'ETH') {
+            // Simple price simulation for different coins
+            const dividers: Record<string, number> = { 'ETH': 20, 'XRP': 60000, 'SOL': 400 };
+            const div = dividers[coin] || 1;
+
+            if (div !== 1) {
                 mockData = mockData.map(d => ({
                     ...d,
-                    close: d.close / 20,
-                    high: d.high / 20,
-                    low: d.low / 20,
-                    open: d.open / 20,
-                    sma_50: d.sma_50 ? d.sma_50 / 20 : null,
-                    sma_200: d.sma_200 ? d.sma_200 / 20 : null,
-                    bb_upper: d.bb_upper ? d.bb_upper / 20 : null,
-                    bb_lower: d.bb_lower ? d.bb_lower / 20 : null,
+                    close: d.close / div,
+                    high: d.high / div,
+                    low: d.low / div,
+                    open: d.open / div,
+                    sma_50: d.sma_50 ? d.sma_50 / div : null,
+                    sma_200: d.sma_200 ? d.sma_200 / div : null,
+                    bb_upper: d.bb_upper ? d.bb_upper / div : null,
+                    bb_lower: d.bb_lower ? d.bb_lower / div : null,
                 }));
             }
             
-            // Sort appropriately for chart (oldest first)
             mockData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
             setData(mockData);
             setLoading(false);
             return;
@@ -72,7 +81,7 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
             let allData: BitcoinData[] = [];
             
             if (year === 'ALL') {
-                // Fetch in chunks to bypass 1000-row limit
+                // ... (Pagination Logic remains same)
                 const PAGE_SIZE = 1000;
                 let from = 0;
                 let hasMore = true;
@@ -84,24 +93,17 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
                         .order('date', { ascending: false })
                         .range(from, from + PAGE_SIZE - 1);
 
-                    if (chunkError) {
-                        console.error("Supabase Pagination Error:", chunkError);
-                        throw chunkError;
-                    }
+                    if (chunkError) throw chunkError;
 
-                    if (chunk) {
+                    if (chunk && chunk.length > 0) {
                         allData = [...allData, ...chunk];
-                        if (chunk.length < PAGE_SIZE) {
-                            hasMore = false;
-                        } else {
-                            from += PAGE_SIZE;
-                        }
+                        if (chunk.length < PAGE_SIZE) hasMore = false;
+                        else from += PAGE_SIZE;
                     } else {
                         hasMore = false;
                     }
                 }
             } else {
-                // Standard fetch for specific year/limit
                 let query = supabase
                     .from(tableName)
                     .select('*')
@@ -116,17 +118,20 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
                 }
 
                 const { data: fetchedData, error: fetchError } = await query;
-                
-                if (fetchError) {
-                    console.error("Supabase Query Error:", fetchError);
-                    throw fetchError;
-                }
+                if (fetchError) throw fetchError;
                 allData = fetchedData || [];
             }
 
-            // Database returns descending (newest first), reverse for Chart (oldest first)
             setData(allData.reverse() as BitcoinData[]);
         } catch (err) {
+            console.error('Error fetching data:', err);
+            setError(err instanceof Error ? err.message : 'Failed to fetch data');
+            const mockData = generateMockData(limit || 365);
+            setData(mockData);
+        } finally {
+            setLoading(false);
+        }
+    }, [limit, year, tableName, coin]);
             console.error('Error fetching data:', err);
             setError(err instanceof Error ? err.message : 'Failed to fetch data');
             const mockData = generateMockData(limit || 365); // Fallback

@@ -10,7 +10,7 @@ import { CoinSelector } from '@/components/ui/CoinSelector';
 
 export function Orbit() {
     const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
-    const [selectedCoin, setSelectedCoin] = useState<'BTC' | 'ETH'>('BTC');
+    const [selectedCoin, setSelectedCoin] = useState<'BTC' | 'ETH' | 'XRP' | 'SOL'>('BTC');
     
     const { data, kpiData, loading } = useCryptoData({ 
         year: selectedYear, 
@@ -27,6 +27,12 @@ export function Orbit() {
     }
 
     const latest = data[data.length - 1];
+    
+    const getStartYear = (coin: string) => {
+        if (coin === 'SOL') return 2020;
+        if (coin === 'ETH') return 2015;
+        return 2014;
+    };
 
     return (
         <div className="space-y-6 max-w-[1920px] mx-auto pb-8">
@@ -47,7 +53,7 @@ export function Orbit() {
                     <YearFilter 
                         selectedYear={selectedYear} 
                         onChange={setSelectedYear} 
-                        startYear={selectedCoin === 'BTC' ? 2014 : 2015}
+                        startYear={getStartYear(selectedCoin)}
                     />
                 </div>
             </div>

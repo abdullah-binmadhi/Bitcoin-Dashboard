@@ -10,13 +10,19 @@ import { CoinSelector } from '@/components/ui/CoinSelector';
 
 export function RiskOfficer() {
     const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
-    const [selectedCoin, setSelectedCoin] = useState<'BTC' | 'ETH'>('BTC');
+    const [selectedCoin, setSelectedCoin] = useState<'BTC' | 'ETH' | 'XRP' | 'SOL'>('BTC');
     
     const { data, latestData, loading } = useCryptoData({ 
         year: selectedYear, 
         limit: selectedYear === 'ALL' ? undefined : undefined,
         coin: selectedCoin
     });
+
+    const getStartYear = (coin: string) => {
+        if (coin === 'SOL') return 2020;
+        if (coin === 'ETH') return 2015;
+        return 2014;
+    };
 
     // Calculate risk metrics
     const riskMetrics = useMemo(() => {

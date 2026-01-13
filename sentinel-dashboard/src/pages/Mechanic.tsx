@@ -10,7 +10,7 @@ import { CoinSelector } from '@/components/ui/CoinSelector';
 
 export function Mechanic() {
     const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
-    const [selectedCoin, setSelectedCoin] = useState<'BTC' | 'ETH'>('BTC');
+    const [selectedCoin, setSelectedCoin] = useState<'BTC' | 'ETH' | 'XRP' | 'SOL'>('BTC');
     
     const { data, latestData, loading } = useCryptoData({ 
         year: selectedYear, 
@@ -39,6 +39,12 @@ export function Mechanic() {
         ? ((latestData.close - latestData.sma_200) / latestData.sma_200) * 100
         : 0;
 
+    const getStartYear = (coin: string) => {
+        if (coin === 'SOL') return 2020;
+        if (coin === 'ETH') return 2015;
+        return 2014;
+    };
+
     return (
         <div className="space-y-6">
             {/* Page Header */}
@@ -59,7 +65,7 @@ export function Mechanic() {
                     <YearFilter 
                         selectedYear={selectedYear} 
                         onChange={setSelectedYear}
-                        startYear={selectedCoin === 'BTC' ? 2014 : 2015}
+                        startYear={getStartYear(selectedCoin)}
                     />
                 </div>
             </div>
