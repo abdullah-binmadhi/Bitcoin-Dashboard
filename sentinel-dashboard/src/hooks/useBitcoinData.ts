@@ -69,30 +69,63 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
         }
 
         try {
-            let query = supabase
-                .from(tableName)
-                .select('*')
-                .order('date', { ascending: false });
+            let allData: BitcoinData[] = [];
+            
+            if (year === 'ALL') {
+                // Fetch in chunks to bypass 1000-row limit
+                const PAGE_SIZE = 1000;
+                let from = 0;
+                let hasMore = true;
 
-            if (year && year !== 'ALL') {
-                const startDate = `${year}-01-01`;
-                const endDate = `${year}-12-31`;
-                query = query.gte('date', startDate).lte('date', endDate);
-            } else if (limit && !year) {
-                query = query.limit(limit);
-            } else if (year === 'ALL') {
-                 query = query.limit(5000); 
-            }
+                while (hasMore) {
+                    const { data: chunk, error: chunkError } = await supabase
+                        .from(tableName)
+                        .select('*')
+                        .order('date', { ascending: false })
+                        .range(from, from + PAGE_SIZE - 1);
 
-            const { data: fetchedData, error: fetchError } = await query;
+                    if (chunkError) {
+                        console.error("Supabase Pagination Error:", chunkError);
+                        throw chunkError;
+                    }
 
-            if (fetchError) {
-                console.error("Supabase Query Error:", fetchError);
-                throw fetchError;
+                    if (chunk) {
+                        allData = [...allData, ...chunk];
+                        if (chunk.length < PAGE_SIZE) {
+                            hasMore = false;
+                        } else {
+                            from += PAGE_SIZE;
+                        }
+                    } else {
+                        hasMore = false;
+                    }
+                }
+            } else {
+                // Standard fetch for specific year/limit
+                let query = supabase
+                    .from(tableName)
+                    .select('*')
+                    .order('date', { ascending: false });
+
+                if (year) {
+                    const startDate = `${year}-01-01`;
+                    const endDate = `${year}-12-31`;
+                    query = query.gte('date', startDate).lte('date', endDate);
+                } else if (limit) {
+                    query = query.limit(limit);
+                }
+
+                const { data: fetchedData, error: fetchError } = await query;
+                
+                if (fetchError) {
+                    console.error("Supabase Query Error:", fetchError);
+                    throw fetchError;
+                }
+                allData = fetchedData || [];
             }
 
             // Database returns descending (newest first), reverse for Chart (oldest first)
-            setData((fetchedData || []).reverse() as BitcoinData[]);
+            setData(allData.reverse() as BitcoinData[]);
         } catch (err) {
             console.error('Error fetching data:', err);
             setError(err instanceof Error ? err.message : 'Failed to fetch data');
