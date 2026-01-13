@@ -29,10 +29,13 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
     const fetchData = useCallback(async () => {
         setLoading(true);
         setError(null);
+        
+        console.log('Fetching Data with:', { year, limit, coin, isConfigured: isSupabaseConfigured });
 
         if (!isSupabaseConfigured) {
             // Use mock data in demo mode
-            let mockData = generateMockData(limit || 365 * 2);
+            // Generate 10 years of history so filters work
+            let mockData = generateMockData(365 * 10); 
             
             // Apply filtering
             if (year && year !== 'ALL') {
@@ -56,6 +59,9 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
                     bb_lower: d.bb_lower ? d.bb_lower / 20 : null,
                 }));
             }
+            
+            // Sort appropriately for chart (oldest first)
+            mockData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
             setData(mockData);
             setLoading(false);
@@ -84,6 +90,7 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
                 throw fetchError;
             }
 
+            // Database returns descending (newest first), reverse for Chart (oldest first)
             setData((fetchedData || []).reverse() as BitcoinData[]);
         } catch (err) {
             console.error('Error fetching data:', err);
