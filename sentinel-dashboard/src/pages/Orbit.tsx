@@ -29,47 +29,50 @@ export function Orbit() {
     const latest = data[data.length - 1];
 
     return (
-        <div className="space-y-3 max-w-[1920px] mx-auto">
-            {/* Page Header - Compact with Filters */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-1">
-                <div className="flex items-center gap-3">
-                    <div className="rounded-xl bg-emerald-500/10 p-2">
-                        <OrbitIcon className="h-5 w-5 text-emerald-500" />
+        <div className="flex flex-col gap-4 h-[calc(100vh-6rem)] max-w-[1920px] mx-auto overflow-hidden">
+            {/* Page Header & Top Stats */}
+            <div className="flex-shrink-0 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="rounded-xl bg-emerald-500/10 p-2">
+                            <OrbitIcon className="h-5 w-5 text-emerald-500" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold text-slate-100">Orbit</h1>
+                            <p className="text-xs text-slate-400">Executive Overview</p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-xl font-bold text-slate-100">Orbit</h1>
-                        <p className="text-xs text-slate-400">Executive Overview</p>
-                    </div>
-                </div>
 
-                {/* Selectors */}
-                <div className="flex items-center gap-3">
-                    <CoinSelector selectedCoin={selectedCoin} onChange={setSelectedCoin} />
-                    <YearFilter 
-                        selectedYear={selectedYear} 
-                        onChange={setSelectedYear} 
-                        startYear={selectedCoin === 'BTC' ? 2014 : 2015}
-                    />
-                </div>
-            </div>
-
-            {/* KPI Grid - Top Stats */}
-            <KPIGrid kpiData={kpiData} />
-
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 items-start">
-                {/* Price Chart - Takes 2 columns */}
-                <div className="lg:col-span-2 space-y-4 flex flex-col h-full">
-                    <div className="flex-1">
-                        <PriceChart 
-                            data={data} 
-                            title={`${selectedCoin} Price Action ${selectedYear === 'ALL' ? "(Last 365 Days)" : `(${selectedYear})`}`} 
-                            height={500} 
+                    <div className="flex items-center gap-3">
+                        <CoinSelector selectedCoin={selectedCoin} onChange={setSelectedCoin} />
+                        <YearFilter 
+                            selectedYear={selectedYear} 
+                            onChange={setSelectedYear} 
+                            startYear={selectedCoin === 'BTC' ? 2014 : 2015}
                         />
                     </div>
+                </div>
 
-                    {/* Technical Analysis Grid - Fills space below chart */}
-                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                <KPIGrid kpiData={kpiData} />
+            </div>
+
+            {/* Main Content Area - Grows to fill screen */}
+            <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* Left Column: Chart & Tech Stats */}
+                <div className="lg:col-span-2 flex flex-col gap-4 h-full min-h-0">
+                    {/* Chart Container - Grows */}
+                    <Card className="flex-1 min-h-0 flex flex-col overflow-hidden bg-slate-950 border-slate-800">
+                        <div className="flex-1 min-h-0">
+                            <PriceChart 
+                                data={data} 
+                                title={`${selectedCoin} Price Action ${selectedYear === 'ALL' ? "(Last 365 Days)" : `(${selectedYear})`}`} 
+                                height="100%" 
+                            />
+                        </div>
+                    </Card>
+
+                    {/* Tech & Range Stats - Fixed Height */}
+                    <div className="flex-shrink-0 grid grid-cols-2 lg:grid-cols-4 gap-4 h-24">
                         <TechCard
                             title="RSI (14)"
                             value={latest?.rsi?.toFixed(2) || 'N/A'}
@@ -101,59 +104,51 @@ export function Orbit() {
                     </div>
                 </div>
 
-                {/* Right Column: Activity & Volume Stats */}
-                <div className="lg:col-span-1 space-y-3 flex flex-col self-stretch">
-                    <RecentActivity data={data} limit={14} maxHeight={550} />
+                {/* Right Column: Activity, Volume & History Stats */}
+                <div className="lg:col-span-1 flex flex-col gap-4 h-full min-h-0">
+                    {/* Recent Activity - Takes most space */}
+                    <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-slate-800 bg-card text-card-foreground shadow">
+                        <RecentActivity data={data} limit={20} maxHeight={9999} />
+                    </div>
 
-                    {/* Additional Volume Stat - Compact without chart */}
-                    <Card className="p-5 bg-slate-900/50 border-slate-800">
-                        <div>
-                            <h3 className="text-sm font-medium text-slate-400 mb-4">Volume Analysis</h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <p className="text-3xl font-bold text-slate-100">
-                                        ${(latest?.volume / 1e9).toFixed(1)}B
-                                    </p>
-                                    <p className="text-xs text-slate-500 mt-1">
-                                        {selectedYear === 'ALL' ? '24h Trading Volume' : `Avg Volume (${selectedYear})`}
-                                    </p>
-                                </div>
-                                <div className="pt-4 border-t border-slate-800/50">
-                                    <p className="text-sm font-medium text-slate-300">Market Liquidity</p>
-                                    <p className="text-xs text-emerald-500 mt-1">High (Optimal)</p>
-                                </div>
+                    {/* Compact Volume Card */}
+                    <Card className="flex-shrink-0 p-4 bg-slate-900/50 border-slate-800">
+                        <div className="flex justify-between items-start mb-2">
+                            <div>
+                                <p className="text-xs text-slate-500">24h Volume</p>
+                                <p className="text-xl font-bold text-slate-100">
+                                    ${(latest?.volume / 1e9).toFixed(1)}B
+                                </p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-xs text-slate-500">Avg Volume</p>
+                                <p className="text-sm font-medium text-blue-400">
+                                    ${data.length > 0 ? (data.reduce((sum, d) => sum + d.volume, 0) / data.length / 1e9).toFixed(1) : '0'}B
+                                </p>
                             </div>
                         </div>
+                        <div className="pt-2 border-t border-slate-800/50 flex justify-between items-center">
+                            <p className="text-xs text-slate-400">Liquidity Status</p>
+                            <p className="text-xs text-emerald-500 font-medium">High (Optimal)</p>
+                        </div>
                     </Card>
-                </div>
-            </div>
 
-            {/* Bottom Stats Row - Compact */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <StatCard
-                    label={selectedYear === 'ALL' ? "52W High" : `${selectedYear} High`}
-                    value={`$${data.length > 0 ? Math.max(...data.map((d) => d.high)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0'}`}
-                    subtext="Period Max"
-                    color="text-emerald-500"
-                />
-                <StatCard
-                    label={selectedYear === 'ALL' ? "52W Low" : `${selectedYear} Low`}
-                    value={`$${data.length > 0 ? Math.min(...data.map((d) => d.low)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0'}`}
-                    subtext="Period Min"
-                    color="text-rose-500"
-                />
-                <StatCard
-                    label="Avg Volume"
-                    value={`$${data.length > 0 ? (data.reduce((sum, d) => sum + d.volume, 0) / data.length / 1e9).toFixed(1) : '0'}B`}
-                    subtext="Daily Avg"
-                    color="text-blue-500"
-                />
-                <StatCard
-                    label="Dataset"
-                    value={`${data.length} Days`}
-                    subtext="History"
-                    color="text-slate-400"
-                />
+                    {/* Compact Period Stats */}
+                    <div className="flex-shrink-0 grid grid-cols-2 gap-4 h-20">
+                        <StatCard
+                            label={selectedYear === 'ALL' ? "52W High" : `${selectedYear} High`}
+                            value={`$${data.length > 0 ? Math.max(...data.map((d) => d.high)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0'}`}
+                            subtext="Period Max"
+                            color="text-emerald-500"
+                        />
+                        <StatCard
+                            label={selectedYear === 'ALL' ? "52W Low" : `${selectedYear} Low`}
+                            value={`$${data.length > 0 ? Math.min(...data.map((d) => d.low)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0'}`}
+                            subtext="Period Min"
+                            color="text-rose-500"
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     );
