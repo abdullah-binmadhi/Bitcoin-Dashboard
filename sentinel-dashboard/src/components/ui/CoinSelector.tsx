@@ -17,7 +17,7 @@ export function CoinSelector({ selectedCoin, onChange }: CoinSelectorProps) {
 
     return (
         <div className="relative group">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4">
                 {getIcon()}
             </div>
             <select

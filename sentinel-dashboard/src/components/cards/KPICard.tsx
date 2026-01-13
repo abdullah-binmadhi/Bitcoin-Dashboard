@@ -104,7 +104,7 @@ export function KPIGrid({ kpiData }: KPIGridProps) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {/* Live Price */}
             <KPICard
-                title="Bitcoin Price"
+                title="Current Price"
                 value={formatCurrency(kpiData.price)}
                 subtitle={formatPercent(kpiData.priceChangePercent)}
                 icon={isPositive ? <TrendingUp className="h-6 w-6" /> : <TrendingDown className="h-6 w-6" />}
