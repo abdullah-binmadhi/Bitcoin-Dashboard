@@ -34,8 +34,8 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
 
         if (!isSupabaseConfigured) {
             // Use mock data in demo mode
-            // Generate 10 years of history so filters work
-            let mockData = generateMockData(365 * 10); 
+            // Generate 15 years of history to cover 2014-2029
+            let mockData = generateMockData(365 * 15); 
             
             // Apply filtering
             if (year && year !== 'ALL') {
@@ -87,6 +87,7 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
             const { data: fetchedData, error: fetchError } = await query;
 
             if (fetchError) {
+                console.error("Supabase Query Error:", fetchError);
                 throw fetchError;
             }
 
