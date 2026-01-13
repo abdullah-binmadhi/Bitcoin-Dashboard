@@ -71,7 +71,7 @@ export function FibRetracementChart({ data, height = 450 }: FibChartProps) {
                         />
                         <Tooltip 
                             contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155' }}
-                            formatter={(val: number) => [formatCurrency(val), 'Price']}
+                            formatter={(val: any) => [formatCurrency(Number(val)), 'Price']}
                             labelFormatter={(label) => formatShortDate(label)}
                         />
                         

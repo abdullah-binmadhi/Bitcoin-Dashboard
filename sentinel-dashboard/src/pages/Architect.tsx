@@ -2,7 +2,7 @@ import { useCryptoData } from '@/hooks/useBitcoinData';
 import { MACDChart } from '@/components/charts/MACDChart';
 import { FibRetracementChart } from '@/components/charts/FibRetracementChart';
 import { Card, CardContent } from '@/components/ui/card';
-import { Compass, GitMerge, TrendingUp, Layers } from 'lucide-react';
+import { Compass, TrendingUp, Layers } from 'lucide-react';
 import { useState } from 'react';
 import { YearFilter } from '@/components/ui/YearFilter';
 import { CoinSelector } from '@/components/ui/CoinSelector';
