@@ -124,17 +124,6 @@ export function Orbit() {
                                     {selectedYear === 'ALL' ? '24h Trading Volume' : `Avg Vol (${selectedYear})`}
                                 </p>
                             </div>
-                            
-                            {/* Simple Volume Bar Visualization */}
-                            <div className="h-16 flex items-end justify-between gap-1 mt-2">
-                                {[35, 55, 40, 70, 50, 85, 60, 45].map((h, i) => (
-                                    <div 
-                                        key={i} 
-                                        className="w-full bg-slate-700/50 rounded-sm hover:bg-emerald-500/80 transition-colors" 
-                                        style={{ height: `${h}%` }} 
-                                    />
-                                ))}
-                            </div>
                         </div>
                     </Card>
                 </div>
