@@ -82,9 +82,9 @@ export function Correlator() {
         return matrix;
     }, [loading, btc.data, eth.data, sol.data, xrp.data]);
 
-    // 3. Data Processing for Ratio & Scatter
+    // 3. Data Processing for Ratio, Scatter & Rolling Correlation
     const pairData = useMemo(() => {
-        if (loading) return { ratio: [], scatter: [] };
+        if (loading) return { ratio: [], scatter: [], rolling: [] };
 
         const baseData = pair.base === 'BTC' ? btc.data : pair.base === 'ETH' ? eth.data : pair.base === 'SOL' ? sol.data : xrp.data;
         const quoteData = pair.quote === 'BTC' ? btc.data : pair.quote === 'ETH' ? eth.data : pair.quote === 'SOL' ? sol.data : xrp.data;
@@ -101,18 +101,31 @@ export function Correlator() {
         }));
 
         const scatter = slicedBase.map((d, i) => {
-            // Daily Returns
             const prevBase = i > 0 ? slicedBase[i-1].close : d.close;
             const prevQuote = i > 0 ? slicedQuote[i-1].close : slicedQuote[i].close;
-            
             return {
-                x: ((slicedQuote[i].close - prevQuote) / prevQuote) * 100, // Quote return
-                y: ((d.close - prevBase) / prevBase) * 100, // Base return
+                x: ((slicedQuote[i].close - prevQuote) / prevQuote) * 100,
+                y: ((d.close - prevBase) / prevBase) * 100,
                 date: d.date
             };
-        }).slice(1); // Remove first item (no return)
+        }).slice(1);
 
-        return { ratio, scatter };
+        // Rolling Correlation (30-day window)
+        const rolling = [];
+        const windowSize = 30;
+        for (let i = windowSize; i < slicedBase.length; i++) {
+            const windowBase = slicedBase.slice(i - windowSize, i).map(d => d.close);
+            const windowQuote = slicedQuote.slice(i - windowSize, i).map(d => d.close);
+            const corr = calculateCorrelation(windowBase, windowQuote);
+            
+            rolling.push({
+                date: slicedBase[i].date,
+                correlation: corr,
+                is_divergence: corr < 0.5 // Flag divergence
+            });
+        }
+
+        return { ratio, scatter, rolling };
     }, [loading, pair, btc.data, eth.data, sol.data, xrp.data]);
 
 
@@ -280,6 +293,39 @@ export function Correlator() {
                                 </ResponsiveContainer>
                             </CardContent>
                         </Card>
+                        {/* Rolling Correlation Chart */}
+                        <Card className="bg-slate-900/50 border-slate-800 md:col-span-2">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <TrendingUp className="h-4 w-4 text-emerald-500" />
+                                    30-Day Rolling Correlation
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="h-[250px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={pairData.rolling}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                                        <XAxis 
+                                            dataKey="date" 
+                                            tick={{fill: '#64748b', fontSize: 12}} 
+                                            tickFormatter={(val) => new Date(val).toLocaleDateString(undefined, {month: 'short'})}
+                                        />
+                                        <YAxis domain={[-1, 1]} tick={{fill: '#64748b', fontSize: 12}} />
+                                        <RechartsTooltip 
+                                            contentStyle={{backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f1f5f9'}}
+                                            labelFormatter={(l) => new Date(l).toLocaleDateString()}
+                                        />
+                                        <Line 
+                                            type="monotone" 
+                                            dataKey="correlation" 
+                                            stroke="#10b981" 
+                                            strokeWidth={2} 
+                                            dot={false} 
+                                        />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
             </div>
@@ -289,14 +335,22 @@ export function Correlator() {
                 <CardContent className="p-6">
                     <div className="flex items-start gap-4">
                         <div className="rounded-full bg-indigo-500/10 p-3">
-                            <TrendingUp className="h-6 w-6 text-indigo-400" />
+                            <GitMerge className="h-6 w-6 text-indigo-400" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-slate-200">Correlation Insight</h3>
-                            <p className="text-slate-400 mt-1 max-w-3xl">
-                                When the correlation between <strong>{pair.base}</strong> and <strong>{pair.quote}</strong> is high (near 1.0), it suggests they are driven by the same market factors (Beta). 
-                                A breakdown in correlation often signals a specific narrative forming for one asset (Alpha). 
-                                Currently, looking at the scatter plot, notice how outliers (points far from the diagonal) represent days where one asset significantly outperformed the other.
+                            <h3 className="font-semibold text-slate-200">Correlation Intelligence</h3>
+                            <p className="text-slate-400 mt-1 max-w-3xl leading-relaxed">
+                                {pairData.rolling.length > 0 && pairData.rolling[pairData.rolling.length-1].correlation < 0.5 ? (
+                                    <span className="text-amber-400 font-medium">
+                                        ⚠️ DIVERGENCE DETECTED: The rolling correlation has dropped below 0.5. 
+                                        This indicates {pair.base} is decoupling from {pair.quote}. Use this volatility to look for idiosyncratic setups.
+                                    </span>
+                                ) : (
+                                    <span>
+                                        Markets are highly correlated (Current: <span className="text-emerald-400 font-mono">{pairData.rolling.length > 0 ? pairData.rolling[pairData.rolling.length-1].correlation.toFixed(2) : 'N/A'}</span>). 
+                                        Movements in {pair.quote} are likely to be mirrored by {pair.base}. Look for relative strength divergence in the scatter plot.
+                                    </span>
+                                )}
                             </p>
                         </div>
                     </div>
