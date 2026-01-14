@@ -272,6 +272,8 @@ export function Correlator() {
                                         <RechartsTooltip 
                                             cursor={{ strokeDasharray: '3 3' }} 
                                             contentStyle={{backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f1f5f9'}}
+                                            itemStyle={{ color: '#f1f5f9' }}
+                                            labelStyle={{ color: '#94a3b8' }}
                                         />
                                         <Scatter name="Daily Returns" data={pairData.scatter} fill="#8b5cf6" />
                                     </ScatterChart>
