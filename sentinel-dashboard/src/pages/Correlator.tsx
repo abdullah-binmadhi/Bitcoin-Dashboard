@@ -16,8 +16,7 @@ import {
     CartesianGrid, 
     Tooltip as RechartsTooltip,
     LineChart,
-    Line,
-    Legend
+    Line
 } from 'recharts';
 import { useMemo, useState } from 'react';
 import { CoinSelector } from '@/components/ui/CoinSelector';
