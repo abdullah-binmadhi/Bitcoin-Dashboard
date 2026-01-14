@@ -153,6 +153,24 @@ export function RiskOfficer() {
                 </div>
             </div>
 
+            {/* AI Insight Card */}
+            <Card className="bg-gradient-to-r from-red-900/20 to-slate-900 border-red-500/20">
+                <div className="p-4 flex items-start gap-4">
+                    <div className="p-2 bg-red-500/10 rounded-lg shrink-0">
+                        <Shield className="h-5 w-5 text-red-400" />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-semibold text-red-200 mb-1 flex items-center gap-2">
+                            Risk Assessment
+                            <span className="text-[10px] bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded border border-red-500/30">AI Risk Officer</span>
+                        </h3>
+                        <p className="text-slate-300 text-sm leading-relaxed">
+                            {latestData?.risk_insight || "Calculating risk exposure..."}
+                        </p>
+                    </div>
+                </div>
+            </Card>
+
             {/* Risk Metrics Grid */}
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 <MetricCard

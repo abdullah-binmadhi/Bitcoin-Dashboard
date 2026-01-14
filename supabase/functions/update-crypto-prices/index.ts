@@ -30,13 +30,18 @@ Deno.serve(async (req) => {
       const processed = processData(raw)
       
       if (processed) {
-        // AI Insight Generation
-        const insight = await generateInsight(coin.id, processed);
-        processed.market_insight = insight;
+        // AI Insight Generation (Multi-Persona)
+        const insights = await generatePersonaInsights(coin.id, processed);
+        
+        // Merge insights into the data object
+        processed.orbit_insight = insights.orbit;
+        processed.mechanic_insight = insights.mechanic;
+        processed.risk_insight = insights.risk;
+        processed.market_insight = insights.mechanic; // Keep backward compatibility for Architect
 
         const { error } = await supabase.from(coin.table).upsert(processed, { onConflict: 'date' })
         if (error) throw error
-        return `${coin.id} updated with insight`
+        return `${coin.id} updated with 3-persona insights`
       }
       return `${coin.id} skipped`
     }))
@@ -61,23 +66,29 @@ async function fetchData(coinId: string, apiKey: string) {
   return await res.json()
 }
 
-// AI Analysis Function
-async function generateInsight(coin: string, data: any) {
+// AI Analysis Function (Multi-Persona)
+async function generatePersonaInsights(coin: string, data: any) {
     try {
         const prompt = `
-        Act as a professional crypto technical analyst. 
-        Analyze these indicators for ${coin.toUpperCase()}:
-        - Price: $${data.close}
-        - RSI (14): ${data.rsi.toFixed(2)}
-        - 50 SMA: $${data.sma_50.toFixed(2)}
-        - 200 SMA: $${data.sma_200.toFixed(2)}
-        - Bollinger Bands: Upper $${data.bb_upper.toFixed(2)}, Lower $${data.bb_lower.toFixed(2)}
-        - Drawdown: ${data.drawdown_pct.toFixed(2)}%
+        Analyze this crypto data for ${coin.toUpperCase()}:
+        Price: $${data.close}
+        RSI (14): ${data.rsi.toFixed(2)}
+        50 SMA: $${data.sma_50.toFixed(2)}
+        200 SMA: $${data.sma_200.toFixed(2)}
+        Bollinger: Upper $${data.bb_upper.toFixed(2)}, Lower $${data.bb_lower.toFixed(2)}
+        Drawdown: ${data.drawdown_pct.toFixed(2)}%
 
-        Provide a ONE SENTENCE actionable insight. 
-        Focus on whether it's overbought/oversold, trend direction (golden cross/death cross), or volatility squeeze.
-        Do not state the numbers, just the conclusion.
-        Example: "RSI indicates oversold conditions while price touches the lower Bollinger Band, suggesting a potential bounce."
+        Generate 3 distinct insights (1 sentence each) in JSON format:
+        1. "orbit": Executive Summary. Is the trend generally healthy? Key level to watch.
+        2. "mechanic": Technical detail. Mention specific indicators (RSI divergence, SMA cross, BB squeeze).
+        3. "risk": Risk Assessment. Is it overextended? Safe to enter? Volatility warning.
+
+        Return strictly RAW JSON:
+        {
+            "orbit": "...",
+            "mechanic": "...",
+            "risk": "..."
+        }
         `;
 
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_KEY}`, {
@@ -89,11 +100,21 @@ async function generateInsight(coin: string, data: any) {
         });
 
         const resData = await response.json();
-        return resData.candidates?.[0]?.content?.parts?.[0]?.text || "Market conditions are neutral.";
+        
+        let rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!rawText) throw new Error("No AI response");
+
+        // Clean markdown
+        rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+        return JSON.parse(rawText);
 
     } catch (e) {
         console.error("AI Insight Error:", e);
-        return "Market data available, awaiting analysis.";
+        return {
+            orbit: "Market data analysis unavailable.",
+            mechanic: "Technical indicators require fresh data.",
+            risk: "Risk metrics calculation pending."
+        };
     }
 }
 
@@ -117,13 +138,12 @@ function processData(data: any) {
     close: latestPrice, open: latestPrice, high: latestPrice, low: latestPrice,
     volume: data.total_volumes[lastIndex][1] || 0,
     sma_50: sma50, sma_200: sma200, rsi: rsi, bb_upper: upper, bb_lower: lower,
-    drawdown_pct: drawdown,
-    // market_insight will be added by the async function
+    drawdown_pct: drawdown
   }
 }
 
 function calculateSMA(data: number[], period: number) {
-  if (data.length < period) return 0 // Return 0 instead of null for safety
+  if (data.length < period) return 0
   return data.slice(-period).reduce((a, b) => a + b, 0) / period
 }
 

@@ -70,6 +70,24 @@ export function Mechanic() {
                 </div>
             </div>
 
+            {/* AI Insight Card */}
+            <Card className="bg-gradient-to-r from-orange-900/20 to-slate-900 border-orange-500/20">
+                <div className="p-4 flex items-start gap-4">
+                    <div className="p-2 bg-orange-500/10 rounded-lg shrink-0">
+                        <Wrench className="h-5 w-5 text-orange-400" />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-semibold text-orange-200 mb-1 flex items-center gap-2">
+                            Technical Diagnosis
+                            <span className="text-[10px] bg-orange-500/20 text-orange-300 px-1.5 py-0.5 rounded border border-orange-500/30">AI Mechanic</span>
+                        </h3>
+                        <p className="text-slate-300 text-sm leading-relaxed">
+                            {latestData?.mechanic_insight || "Calibrating indicators..."}
+                        </p>
+                    </div>
+                </div>
+            </Card>
+
             {/* Technical Indicator Summary Cards */}
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 {/* SMA 50 Position */}

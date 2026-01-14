@@ -13,6 +13,9 @@ export interface BitcoinData {
     bb_lower: number | null;
     drawdown_pct: number | null;
     market_insight?: string | null;
+    orbit_insight?: string | null;
+    mechanic_insight?: string | null;
+    risk_insight?: string | null;
     created_at?: string;
     updated_at?: string;
 }

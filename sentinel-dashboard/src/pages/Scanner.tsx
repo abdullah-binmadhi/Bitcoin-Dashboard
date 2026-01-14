@@ -1,4 +1,5 @@
 import { useCryptoData } from '@/hooks/useBitcoinData';
+import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
     ScanEye, 
@@ -7,7 +8,8 @@ import {
     Activity, 
     BarChart3,
     TrendingUp,
-    AlertCircle
+    AlertCircle,
+    Radar
 } from 'lucide-react';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import { 
@@ -41,14 +43,6 @@ export function Scanner() {
     const sol = useCryptoData({ coin: 'SOL', limit: 365 });
 
     const loading = btc.loading || eth.loading || xrp.loading || sol.loading;
-
-    if (loading) {
-        return (
-            <div className="flex h-[calc(100vh-10rem)] items-center justify-center">
-                <div className="animate-spin h-8 w-8 border-4 border-slate-700 border-t-emerald-500 rounded-full" />
-            </div>
-        );
-    }
 
     // Helper to process data into MarketAsset
     const processAsset = (symbol: string, name: string, data: any[]): MarketAsset => {
@@ -87,10 +81,33 @@ export function Scanner() {
         processAsset('ETH', 'Ethereum', eth.data),
         processAsset('SOL', 'Solana', sol.data),
         processAsset('XRP', 'Ripple', xrp.data),
-    ].sort((a, b) => b.volume - a.volume); // Sort by volume by default
+    ].sort((a, b) => b.volume - a.volume); 
 
     const topGainer = [...assets].sort((a, b) => b.change24h - a.change24h)[0];
     const topLoser = [...assets].sort((a, b) => a.change24h - b.change24h)[0];
+
+    // AI Analysis
+    const simplifiedAssets = assets.map(a => ({ 
+        s: a.symbol, 
+        p: a.price, 
+        c24: a.change24h, 
+        rsi: a.rsi, 
+        tr: a.trend 
+    }));
+    
+    const { insight: aiInsight, loading: aiLoading } = useAIAnalysis(
+        { assets: simplifiedAssets },
+        "Identify the single best market opportunity or risk from this list based on RSI and Trend. Be concise.",
+        !loading && assets[0].price > 0
+    );
+
+    if (loading) {
+        return (
+            <div className="flex h-[calc(100vh-10rem)] items-center justify-center">
+                <div className="animate-spin h-8 w-8 border-4 border-slate-700 border-t-emerald-500 rounded-full" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 max-w-[1920px] mx-auto pb-8">
@@ -104,6 +121,24 @@ export function Scanner() {
                     <p className="text-sm text-slate-400">Real-time Market Opportunities</p>
                 </div>
             </div>
+
+            {/* AI Insight Card */}
+            <Card className="bg-gradient-to-r from-blue-900/20 to-slate-900 border-blue-500/20">
+                <div className="p-4 flex items-start gap-4">
+                    <div className="p-2 bg-blue-500/10 rounded-lg shrink-0">
+                        <Radar className="h-5 w-5 text-blue-400" />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-semibold text-blue-200 mb-1 flex items-center gap-2">
+                            Opportunity Radar
+                            <span className="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded border border-blue-500/30">AI Scout</span>
+                        </h3>
+                        <p className="text-slate-300 text-sm leading-relaxed">
+                            {aiInsight || (aiLoading ? "Scanning market data..." : "Awaiting assets...")}
+                        </p>
+                    </div>
+                </div>
+            </Card>
 
             {/* Quick Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

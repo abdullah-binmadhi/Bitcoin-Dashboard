@@ -12,7 +12,7 @@ export function Orbit() {
     const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
     const [selectedCoin, setSelectedCoin] = useState<'BTC' | 'ETH' | 'XRP' | 'SOL'>('BTC');
     
-    const { data, kpiData, loading } = useCryptoData({ 
+    const { data, latestData, kpiData, loading } = useCryptoData({ 
         year: selectedYear, 
         limit: selectedYear === 'ALL' ? undefined : undefined,
         coin: selectedCoin 
@@ -28,12 +28,18 @@ export function Orbit() {
 
     const latest = data[data.length - 1];
     
-    const getStartYear = (coin: string) => {
-        if (coin === 'SOL') return 2020;
-        if (coin === 'ETH') return 2015;
-        return 2014;
-    };
+    // Fallback logic handled in hook now, but we access latestData via hook return ideally. 
+    // Since hook returns 'latestData', let's use that for the Insight.
+    // Wait, the component is currently using `const { data, kpiData, loading } = ...`
+    // I need to destructure `latestData` from the hook.
 
+    // Let's modify the destructuring first (in a separate tool call if needed, or combined here).
+    // Actually, I can just grab it from data[last] but the fallback logic is applied to the object returned by the hook as `latestData`, NOT to the `data` array itself (which is raw state).
+    // So I MUST use `latestData` from the hook.
+    
+    // Re-reading hook: `const latestData = data.length > 0 ? { ...data[data.length - 1] } : null;` -> It creates a COPY.
+    // So `data` array does NOT have the fallbacks. `latestData` DOES.
+    
     return (
         <div className="space-y-6 max-w-[1920px] mx-auto pb-8">
             {/* Header & Controls */}
@@ -57,6 +63,24 @@ export function Orbit() {
                     />
                 </div>
             </div>
+
+            {/* AI Insight Card */}
+            <Card className="bg-gradient-to-r from-emerald-900/20 to-slate-900 border-emerald-500/20">
+                <div className="p-4 flex items-start gap-4">
+                    <div className="p-2 bg-emerald-500/10 rounded-lg shrink-0">
+                        <Activity className="h-5 w-5 text-emerald-400" />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-semibold text-emerald-200 mb-1 flex items-center gap-2">
+                            Executive Summary
+                            <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-500/30">AI Analyst</span>
+                        </h3>
+                        <p className="text-slate-300 text-sm leading-relaxed">
+                            {latestData?.orbit_insight || "Analyzing market trend..."}
+                        </p>
+                    </div>
+                </div>
+            </Card>
 
             {/* Top Level KPIs */}
             <KPIGrid kpiData={kpiData} />

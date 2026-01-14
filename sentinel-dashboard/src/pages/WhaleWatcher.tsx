@@ -1,7 +1,8 @@
 import { useCryptoData } from '@/hooks/useBitcoinData';
+import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 import { WhaleTxTable, type WhaleTx } from '@/components/tables/WhaleTxTable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Ship, Anchor, Waves, ArrowRightLeft, PieChart as PieIcon, BarChart3 } from 'lucide-react';
+import { Ship, Anchor, Waves, ArrowRightLeft, PieChart as PieIcon, BarChart3, BrainCircuit } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { CoinSelector } from '@/components/ui/CoinSelector';
 import { 
@@ -86,6 +87,13 @@ export function WhaleWatcher() {
         return { inflow, outflow, net: inflow - outflow, largeCount };
     }, [whaleData]);
 
+    // AI Analysis
+    const { insight: aiInsight, loading: aiLoading } = useAIAnalysis(
+        { coin: selectedCoin, stats },
+        "Analyze these whale flow stats. Is smart money accumulating (outflow > inflow) or dumping (inflow > outflow)?",
+        whaleData.length > 0
+    );
+
     const chartData = useMemo(() => {
         return [
             { name: 'Inflow', value: stats.inflow, color: '#10b981' }, // Emerald
@@ -127,6 +135,24 @@ export function WhaleWatcher() {
                 </div>
                 <CoinSelector selectedCoin={selectedCoin} onChange={setSelectedCoin} />
             </div>
+
+            {/* AI Insight Card */}
+            <Card className="bg-gradient-to-r from-indigo-900/20 to-slate-900 border-indigo-500/20">
+                <div className="p-4 flex items-start gap-4">
+                    <div className="p-2 bg-indigo-500/10 rounded-lg shrink-0">
+                        <BrainCircuit className="h-5 w-5 text-indigo-400" />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-semibold text-indigo-200 mb-1 flex items-center gap-2">
+                            On-Chain Intelligence
+                            <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-500/30">AI Detective</span>
+                        </h3>
+                        <p className="text-slate-300 text-sm leading-relaxed">
+                            {aiInsight || (aiLoading ? "Analyzing whale movements..." : "Waiting for flow data...")}
+                        </p>
+                    </div>
+                </div>
+            </Card>
 
             {/* Analytics Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -183,14 +183,21 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
     const latestData = data.length > 0 ? { ...data[data.length - 1] } : null;
     
     // Inject fallback insight if missing
-    if (latestData && !latestData.market_insight) {
-        if (latestData.rsi && latestData.rsi > 70) {
-            latestData.market_insight = "Asset is currently in overbought territory (RSI > 70). Technical signals suggest a potential cool-off or consolidation period ahead.";
-        } else if (latestData.rsi && latestData.rsi < 30) {
-            latestData.market_insight = "Asset is showing oversold conditions (RSI < 30). Historically, this level has preceded relief rallies or local bottoms.";
-        } else {
-            latestData.market_insight = "Market momentum is currently neutral. Price is consolidating within existing Bollinger Band ranges with no immediate breakout signals.";
+    if (latestData) {
+        if (!latestData.market_insight) {
+            if (latestData.rsi && latestData.rsi > 70) {
+                latestData.market_insight = "Asset is currently in overbought territory (RSI > 70). Technical signals suggest a potential cool-off or consolidation period ahead.";
+            } else if (latestData.rsi && latestData.rsi < 30) {
+                latestData.market_insight = "Asset is showing oversold conditions (RSI < 30). Historically, this level has preceded relief rallies or local bottoms.";
+            } else {
+                latestData.market_insight = "Market momentum is currently neutral. Price is consolidating within existing Bollinger Band ranges with no immediate breakout signals.";
+            }
         }
+        
+        // Persona Fallbacks (Reuse market_insight logic if needed)
+        if (!latestData.orbit_insight) latestData.orbit_insight = latestData.market_insight;
+        if (!latestData.mechanic_insight) latestData.mechanic_insight = "Technical indicators (RSI, SMA, BB) are neutral. Awaiting clear breakout signal.";
+        if (!latestData.risk_insight) latestData.risk_insight = `Drawdown is currently ${latestData.drawdown_pct?.toFixed(2)}%. Volatility is within standard deviation.`;
     }
 
     const previousData = data.length > 1 ? data[data.length - 2] : null;
