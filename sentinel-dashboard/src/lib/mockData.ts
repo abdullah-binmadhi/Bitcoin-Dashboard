@@ -100,6 +100,7 @@ export function generateMockData(days: number): BitcoinData[] {
             bb_upper: bbUpper ? Math.round(bbUpper * 100) / 100 : null,
             bb_lower: bbLower ? Math.round(bbLower * 100) / 100 : null,
             drawdown_pct: Math.round(drawdownPct * 100) / 100,
+            market_insight: i === 0 ? "Momentum remains neutral as RSI stabilizes around 50, but a compression in Bollinger Bands suggests a volatility spike is imminent." : null
         });
     }
 

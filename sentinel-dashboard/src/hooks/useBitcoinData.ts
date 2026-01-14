@@ -180,7 +180,19 @@ export function useCryptoData(options: UseCryptoDataOptions = {}): UseCryptoData
     }, [fetchData, tableName]);
 
     // ... Rest of calculations (KPIs) remain generic ...
-    const latestData = data.length > 0 ? data[data.length - 1] : null;
+    const latestData = data.length > 0 ? { ...data[data.length - 1] } : null;
+    
+    // Inject fallback insight if missing
+    if (latestData && !latestData.market_insight) {
+        if (latestData.rsi && latestData.rsi > 70) {
+            latestData.market_insight = "Asset is currently in overbought territory (RSI > 70). Technical signals suggest a potential cool-off or consolidation period ahead.";
+        } else if (latestData.rsi && latestData.rsi < 30) {
+            latestData.market_insight = "Asset is showing oversold conditions (RSI < 30). Historically, this level has preceded relief rallies or local bottoms.";
+        } else {
+            latestData.market_insight = "Market momentum is currently neutral. Price is consolidating within existing Bollinger Band ranges with no immediate breakout signals.";
+        }
+    }
+
     const previousData = data.length > 1 ? data[data.length - 2] : null;
 
     const kpiData: KPIData | null = latestData
