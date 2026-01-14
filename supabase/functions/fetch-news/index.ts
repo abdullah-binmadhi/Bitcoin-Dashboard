@@ -2,6 +2,8 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
 const NEWSAPI_KEY = '778d867706b247d3bd84d59f5f2473ef';
 const NEWSAPI_URL = 'https://newsapi.org/v2/everything';
+// Hardcoded Gemini Key for immediate use
+const GEMINI_KEY = 'AIzaSyBUkcOviuRg5vha4r43p4ywWQMbo1XG-Mw';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*', 
@@ -32,28 +34,38 @@ serve(async (req) => {
         source: item.source.name,
         published_at: item.publishedAt,
         url: item.url,
-        // Default values (will be overwritten if AI succeeds)
         sentiment: 'neutral',
         score: 50
     }));
 
-    // 3. AI Sentiment Analysis
-    const geminiKey = 'AIzaSyBUkcOviuRg5vha4r43p4ywWQMbo1XG-Mw';
-    
-    if (geminiKey) {
-        console.log("Gemini Key found, analyzing sentiment...");
+    let marketSummary = {
+        sentiment: 'Neutral',
+        score: 50,
+        summary: "Market analysis unavailable.",
+        bullish_driver: "None",
+        bearish_driver: "None"
+    };
+
+    // 3. AI Analysis (Individual + Summary)
+    if (GEMINI_KEY) {
+        console.log("Gemini Key found, analyzing sentiment & summary...");
         try {
-            articles = await analyzeSentimentWithGemini(articles, geminiKey);
+            const result = await analyzeMarketWithGemini(articles, GEMINI_KEY);
+            articles = result.articles;
+            marketSummary = result.summary;
         } catch (err) {
             console.error("AI Analysis failed, reverting to mock:", err);
             articles = addMockSentiment(articles);
         }
     } else {
-        console.log("No GEMINI_API_KEY found. Using mock data.");
         articles = addMockSentiment(articles);
     }
 
-    return new Response(JSON.stringify(articles), {
+    // Return object with both articles AND summary
+    return new Response(JSON.stringify({
+        articles,
+        summary: marketSummary
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
@@ -66,16 +78,30 @@ serve(async (req) => {
   }
 });
 
-// Helper: AI Analysis
-async function analyzeSentimentWithGemini(articles: any[], apiKey: string) {
+// Helper: AI Analysis (Combined)
+async function analyzeMarketWithGemini(articles: any[], apiKey: string) {
     const titles = articles.map((a, i) => `${i}: ${a.title}`).join('\n');
     
     const prompt = `
-    Analyze the sentiment of these crypto headlines. 
-    Return a RAW JSON array of objects (no markdown, no code blocks) corresponding to the order of headlines.
-    Each object must have:
-    - "sentiment": "bullish", "bearish", or "neutral"
-    - "score": number 0-100 (0=extreme fear, 100=extreme greed)
+    You are a crypto market analyst. Analyze these headlines. 
+
+    Part 1: Analyze individual sentiment for each headline.
+    Part 2: Write a "Daily Intelligence Briefing" summarizing the overall market mood.
+
+    Return a RAW JSON object with this exact structure:
+    {
+        "sentiments": [
+            { "sentiment": "bullish"|"bearish"|"neutral", "score": number (0-100) },
+            ... (one for each headline)
+        ],
+        "summary": {
+            "sentiment": "Bullish"|"Bearish"|"Neutral"|"Greed"|"Fear",
+            "score": number (0-100),
+            "summary": "A concise 2-sentence summary of the market narrative based on these stories.",
+            "bullish_driver": "The single most positive news topic/event from the list.",
+            "bearish_driver": "The single most negative news topic/event from the list."
+        }
+    }
 
     Headlines:
     ${titles}
@@ -96,20 +122,24 @@ async function analyzeSentimentWithGemini(articles: any[], apiKey: string) {
     }
 
     let rawText = data.candidates[0].content.parts[0].text;
-    // Clean up potential markdown code blocks
     rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
 
-    const sentiments = JSON.parse(rawText);
+    const result = JSON.parse(rawText);
 
     // Merge results
-    return articles.map((article, index) => {
-        const result = sentiments[index];
+    const updatedArticles = articles.map((article, index) => {
+        const sent = result.sentiments[index];
         return {
             ...article,
-            sentiment: result ? result.sentiment : 'neutral',
-            score: result ? result.score : 50
+            sentiment: sent ? sent.sentiment : 'neutral',
+            score: sent ? sent.score : 50
         };
     });
+
+    return {
+        articles: updatedArticles,
+        summary: result.summary
+    };
 }
 
 // Helper: Mock Fallback

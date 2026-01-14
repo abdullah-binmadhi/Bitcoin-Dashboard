@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Newspaper, Flame, Hash, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { Newspaper, Flame, Hash, ChevronLeft, ChevronRight, RefreshCw, Zap, TrendingUp, TrendingDown, BrainCircuit } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { NewsCard } from '@/components/cards/NewsCard';
 import { useNews } from '@/hooks/useNews';
@@ -16,7 +16,7 @@ const TRENDING_TOPICS = [
 const ITEMS_PER_PAGE = 6;
 
 export function Newsroom() {
-    const { news, loading, error, refetch } = useNews();
+    const { news, summary, loading, error, refetch } = useNews();
     const [filter, setFilter] = useState<'all' | 'bullish' | 'bearish'>('all');
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -42,6 +42,15 @@ export function Newsroom() {
     };
 
     const marketMood = useMemo(() => {
+        // Prefer AI Summary if available
+        if (summary) {
+            let color = 'text-yellow-500';
+            if (summary.score >= 60) color = 'text-emerald-500';
+            if (summary.score <= 40) color = 'text-rose-500';
+            return { label: summary.sentiment, score: summary.score, color };
+        }
+
+        // Fallback to calculation
         if (!news || news.length === 0) return { label: 'Neutral', score: 50, color: 'text-slate-400' };
         
         const avgScore = news.reduce((acc, curr) => acc + curr.score, 0) / news.length;
@@ -49,7 +58,7 @@ export function Newsroom() {
         if (avgScore >= 60) return { label: 'Greed', score: Math.round(avgScore), color: 'text-emerald-500' };
         if (avgScore <= 40) return { label: 'Fear', score: Math.round(avgScore), color: 'text-rose-500' };
         return { label: 'Neutral', score: Math.round(avgScore), color: 'text-yellow-500' };
-    }, [news]);
+    }, [news, summary]);
 
     return (
         <div className="space-y-6 max-w-[1920px] mx-auto pb-8">
@@ -72,6 +81,58 @@ export function Newsroom() {
                     <RefreshCw className={`h-5 w-5 text-slate-400 ${loading ? 'animate-spin' : ''}`} />
                 </button>
             </div>
+
+            {/* AI Daily Briefing (New Feature) */}
+            {summary && !loading && (
+                <Card className="bg-gradient-to-r from-slate-900 to-slate-950 border-blue-500/20 shadow-lg shadow-blue-900/10">
+                    <CardHeader className="pb-2">
+                        <div className="flex items-center gap-2">
+                            <BrainCircuit className="h-5 w-5 text-blue-400" />
+                            <h2 className="text-lg font-semibold text-slate-100">AI Daily Briefing</h2>
+                            <span className="text-[10px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">Gemini 1.5 Pro</span>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Narrative */}
+                            <div className="md:col-span-2 space-y-3">
+                                <p className="text-slate-300 leading-relaxed text-sm md:text-base">
+                                    {summary.summary}
+                                </p>
+                                <div className="flex gap-4 pt-2">
+                                    <div className="flex-1 bg-emerald-500/5 border border-emerald-500/10 rounded-lg p-3">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <TrendingUp className="h-4 w-4 text-emerald-500" />
+                                            <span className="text-xs font-bold text-emerald-500 uppercase">Bullish Driver</span>
+                                        </div>
+                                        <p className="text-xs text-slate-400">{summary.bullish_driver}</p>
+                                    </div>
+                                    <div className="flex-1 bg-rose-500/5 border border-rose-500/10 rounded-lg p-3">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <TrendingDown className="h-4 w-4 text-rose-500" />
+                                            <span className="text-xs font-bold text-rose-500 uppercase">Bearish Driver</span>
+                                        </div>
+                                        <p className="text-xs text-slate-400">{summary.bearish_driver}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Score Card */}
+                            <div className="flex flex-col items-center justify-center p-4 bg-slate-900 rounded-xl border border-slate-800">
+                                <span className="text-slate-400 text-xs uppercase tracking-wider mb-2">Overall Sentiment</span>
+                                <span className={`text-4xl font-bold mb-1 ${marketMood.color}`}>{marketMood.label}</span>
+                                <div className="h-1.5 w-24 bg-slate-800 rounded-full overflow-hidden mt-2">
+                                    <div 
+                                        className={`h-full ${marketMood.score > 50 ? 'bg-emerald-500' : 'bg-rose-500'}`} 
+                                        style={{ width: `${marketMood.score}%` }} 
+                                    />
+                                </div>
+                                <span className="text-xs text-slate-500 mt-2">Score: {marketMood.score}/100</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Feed - Left Column (2/3) */}
@@ -167,27 +228,29 @@ export function Newsroom() {
                         </CardContent>
                     </Card>
 
-                    {/* Sentiment Summary */}
-                    <Card className="bg-gradient-to-br from-slate-900 to-slate-950 border-slate-800">
-                        <CardHeader>
-                            <CardTitle className="text-base text-slate-200">AI Market Mood</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-center py-4">
-                                <div className={`text-4xl font-bold ${marketMood.color} mb-1`}>{marketMood.label}</div>
-                                <div className="text-sm text-slate-400">Score: {marketMood.score}/100</div>
-                            </div>
-                            <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                                <div 
-                                    className="h-full bg-gradient-to-r from-rose-500 via-yellow-500 to-emerald-500 transition-all duration-1000" 
-                                    style={{ width: `${marketMood.score}%` }}
-                                />
-                            </div>
-                            <p className="text-xs text-center text-slate-500 mt-2">
-                                Based on analysis of {news?.length || 0} articles today.
-                            </p>
-                        </CardContent>
-                    </Card>
+                    {/* Sentiment Summary (Simplified if Briefing exists) */}
+                    {!summary && (
+                        <Card className="bg-gradient-to-br from-slate-900 to-slate-950 border-slate-800">
+                            <CardHeader>
+                                <CardTitle className="text-base text-slate-200">AI Market Mood</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-center py-4">
+                                    <div className={`text-4xl font-bold ${marketMood.color} mb-1`}>{marketMood.label}</div>
+                                    <div className="text-sm text-slate-400">Score: {marketMood.score}/100</div>
+                                </div>
+                                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full bg-gradient-to-r from-rose-500 via-yellow-500 to-emerald-500 transition-all duration-1000" 
+                                        style={{ width: `${marketMood.score}%` }}
+                                    />
+                                </div>
+                                <p className="text-xs text-center text-slate-500 mt-2">
+                                    Based on analysis of {news?.length || 0} articles today.
+                                </p>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             </div>
         </div>
