@@ -12,7 +12,7 @@ import {
     X,
     Compass,
     Newspaper,
-    Ship
+    Ship,
     ScanEye,
     GitMerge
 } from 'lucide-react';
