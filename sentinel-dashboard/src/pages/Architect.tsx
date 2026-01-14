@@ -13,7 +13,7 @@ export function Architect() {
     const [selectedYear, setSelectedYear] = useState<string | number>('ALL');
     const [selectedCoin, setSelectedCoin] = useState<'BTC' | 'ETH' | 'XRP' | 'SOL'>('BTC');
     
-    const { data, loading } = useCryptoData({ 
+    const { data, latestData, loading } = useCryptoData({ 
         year: selectedYear, 
         limit: selectedYear === 'ALL' ? undefined : undefined,
         coin: selectedCoin
@@ -58,7 +58,7 @@ export function Architect() {
             </div>
 
             {/* AI Insight Card */}
-            {data.length > 0 && data[data.length - 1].market_insight && (
+            {latestData && latestData.market_insight && (
                 <Card className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-purple-500/30">
                     <CardContent className="p-4 flex items-start gap-4">
                         <div className="p-2 bg-purple-500/10 rounded-lg shrink-0">
@@ -70,7 +70,7 @@ export function Architect() {
                                 <span className="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded border border-purple-500/30">Gemini Pro</span>
                             </h3>
                             <p className="text-slate-300 text-sm leading-relaxed">
-                                {data[data.length - 1].market_insight}
+                                {latestData.market_insight}
                             </p>
                         </div>
                     </CardContent>
