@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Newspaper, Flame, Hash, ChevronLeft, ChevronRight, RefreshCw, Zap, TrendingUp, TrendingDown, BrainCircuit } from 'lucide-react';
+import { Newspaper, Flame, Hash, ChevronLeft, ChevronRight, RefreshCw, TrendingUp, TrendingDown, BrainCircuit } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { NewsCard } from '@/components/cards/NewsCard';
 import { useNews } from '@/hooks/useNews';
