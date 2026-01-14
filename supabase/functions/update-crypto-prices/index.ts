@@ -1,6 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const COINGECKO_API = 'https://api.coingecko.com/api/v3'
+// Hardcoded Gemini Key for immediate use
+const GEMINI_KEY = 'AIzaSyBUkcOviuRg5vha4r43p4ywWQMbo1XG-Mw';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -25,10 +28,15 @@ Deno.serve(async (req) => {
     const updates = await Promise.all(coins.map(async (coin) => {
       const raw = await fetchData(coin.id, coingeckoKey)
       const processed = processData(raw)
+      
       if (processed) {
+        // AI Insight Generation
+        const insight = await generateInsight(coin.id, processed);
+        processed.market_insight = insight;
+
         const { error } = await supabase.from(coin.table).upsert(processed, { onConflict: 'date' })
         if (error) throw error
-        return `${coin.id} updated`
+        return `${coin.id} updated with insight`
       }
       return `${coin.id} skipped`
     }))
@@ -53,6 +61,42 @@ async function fetchData(coinId: string, apiKey: string) {
   return await res.json()
 }
 
+// AI Analysis Function
+async function generateInsight(coin: string, data: any) {
+    try {
+        const prompt = `
+        Act as a professional crypto technical analyst. 
+        Analyze these indicators for ${coin.toUpperCase()}:
+        - Price: $${data.close}
+        - RSI (14): ${data.rsi.toFixed(2)}
+        - 50 SMA: $${data.sma_50.toFixed(2)}
+        - 200 SMA: $${data.sma_200.toFixed(2)}
+        - Bollinger Bands: Upper $${data.bb_upper.toFixed(2)}, Lower $${data.bb_lower.toFixed(2)}
+        - Drawdown: ${data.drawdown_pct.toFixed(2)}%
+
+        Provide a ONE SENTENCE actionable insight. 
+        Focus on whether it's overbought/oversold, trend direction (golden cross/death cross), or volatility squeeze.
+        Do not state the numbers, just the conclusion.
+        Example: "RSI indicates oversold conditions while price touches the lower Bollinger Band, suggesting a potential bounce."
+        `;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            })
+        });
+
+        const resData = await response.json();
+        return resData.candidates?.[0]?.content?.parts?.[0]?.text || "Market conditions are neutral.";
+
+    } catch (e) {
+        console.error("AI Insight Error:", e);
+        return "Market data available, awaiting analysis.";
+    }
+}
+
 function processData(data: any) {
   if (!data || !data.prices) return null
   const prices = data.prices
@@ -73,17 +117,18 @@ function processData(data: any) {
     close: latestPrice, open: latestPrice, high: latestPrice, low: latestPrice,
     volume: data.total_volumes[lastIndex][1] || 0,
     sma_50: sma50, sma_200: sma200, rsi: rsi, bb_upper: upper, bb_lower: lower,
-    drawdown_pct: drawdown
+    drawdown_pct: drawdown,
+    // market_insight will be added by the async function
   }
 }
 
 function calculateSMA(data: number[], period: number) {
-  if (data.length < period) return null
+  if (data.length < period) return 0 // Return 0 instead of null for safety
   return data.slice(-period).reduce((a, b) => a + b, 0) / period
 }
 
 function calculateRSI(data: number[], period: number = 14) {
-  if (data.length <= period) return null
+  if (data.length <= period) return 50
   let gains = 0, losses = 0
   for (let i = data.length - period; i < data.length; i++) {
     const diff = data[i] - data[i - 1]
@@ -93,7 +138,7 @@ function calculateRSI(data: number[], period: number = 14) {
 }
 
 function calculateBollingerBands(data: number[], period: number = 20) {
-  if (data.length < period) return { upper: null, lower: null }
+  if (data.length < period) return { upper: 0, lower: 0 }
   const slice = data.slice(-period)
   const mean = slice.reduce((a, b) => a + b, 0) / period
   const std = Math.sqrt(slice.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / period)

@@ -57,6 +57,26 @@ export function Architect() {
                 </div>
             </div>
 
+            {/* AI Insight Card */}
+            {data.length > 0 && data[data.length - 1].market_insight && (
+                <Card className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-purple-500/30">
+                    <CardContent className="p-4 flex items-start gap-4">
+                        <div className="p-2 bg-purple-500/10 rounded-lg shrink-0">
+                            <Activity className="h-5 w-5 text-purple-400" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-semibold text-purple-200 mb-1 flex items-center gap-2">
+                                AI Analyst Insight
+                                <span className="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded border border-purple-500/30">Gemini Pro</span>
+                            </h3>
+                            <p className="text-slate-300 text-sm leading-relaxed">
+                                {data[data.length - 1].market_insight}
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
             {/* Row 1: Momentum (MACD) */}
             <div className="space-y-2">
                 <div className="flex items-center gap-2 text-slate-400 text-sm px-1">
