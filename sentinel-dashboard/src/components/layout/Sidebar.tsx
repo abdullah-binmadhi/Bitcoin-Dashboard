@@ -13,6 +13,8 @@ import {
     Compass,
     Newspaper,
     Ship
+    ScanEye,
+    GitMerge
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -41,6 +43,18 @@ const navItems: NavItem[] = [
         icon: Compass,
         label: 'The Architect',
         description: 'Advanced Patterns',
+    },
+    {
+        to: '/scanner',
+        icon: ScanEye,
+        label: 'The Scanner',
+        description: 'Market Opportunities',
+    },
+    {
+        to: '/correlator',
+        icon: GitMerge,
+        label: 'The Correlator',
+        description: 'Asset Relationships',
     },
     {
         to: '/risk-officer',
