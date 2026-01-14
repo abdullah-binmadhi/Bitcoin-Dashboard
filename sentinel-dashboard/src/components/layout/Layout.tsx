@@ -3,6 +3,7 @@ import { Sidebar } from './Sidebar';
 import { TickerTape } from './TickerTape';
 import { useCryptoData } from '@/hooks/useBitcoinData';
 import { useState } from 'react';
+import { Menu, Bitcoin } from 'lucide-react';
 
 export function Layout() {
     const { loading } = useCryptoData({ limit: 365 });
@@ -13,6 +14,20 @@ export function Layout() {
             <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             <div className="md:ml-64 transition-all duration-300 ml-0">
+                {/* Mobile Header */}
+                <div className="md:hidden flex items-center justify-between p-4 border-b border-slate-800 bg-slate-950 sticky top-0 z-20">
+                    <div className="flex items-center gap-2">
+                         <Bitcoin className="h-6 w-6 text-emerald-500" />
+                         <span className="font-bold text-slate-100">SENTINEL</span>
+                    </div>
+                    <button 
+                        onClick={() => setSidebarOpen(true)}
+                        className="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded-lg"
+                    >
+                        <Menu className="h-6 w-6" />
+                    </button>
+                </div>
+
                 <TickerTape />
                 <main className="p-4 md:p-6">
                     {loading ? (
