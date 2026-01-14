@@ -27,18 +27,12 @@ export function Orbit() {
     }
 
     const latest = data[data.length - 1];
-    
-    // Fallback logic handled in hook now, but we access latestData via hook return ideally. 
-    // Since hook returns 'latestData', let's use that for the Insight.
-    // Wait, the component is currently using `const { data, kpiData, loading } = ...`
-    // I need to destructure `latestData` from the hook.
 
-    // Let's modify the destructuring first (in a separate tool call if needed, or combined here).
-    // Actually, I can just grab it from data[last] but the fallback logic is applied to the object returned by the hook as `latestData`, NOT to the `data` array itself (which is raw state).
-    // So I MUST use `latestData` from the hook.
-    
-    // Re-reading hook: `const latestData = data.length > 0 ? { ...data[data.length - 1] } : null;` -> It creates a COPY.
-    // So `data` array does NOT have the fallbacks. `latestData` DOES.
+    const getStartYear = (coin: string) => {
+        if (coin === 'SOL') return 2020;
+        if (coin === 'ETH') return 2015;
+        return 2014;
+    };
     
     return (
         <div className="space-y-6 max-w-[1920px] mx-auto pb-8">
