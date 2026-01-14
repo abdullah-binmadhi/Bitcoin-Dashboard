@@ -41,6 +41,16 @@ export function Newsroom() {
         setCurrentPage(1);
     };
 
+    const marketMood = useMemo(() => {
+        if (!news || news.length === 0) return { label: 'Neutral', score: 50, color: 'text-slate-400' };
+        
+        const avgScore = news.reduce((acc, curr) => acc + curr.score, 0) / news.length;
+        
+        if (avgScore >= 60) return { label: 'Greed', score: Math.round(avgScore), color: 'text-emerald-500' };
+        if (avgScore <= 40) return { label: 'Fear', score: Math.round(avgScore), color: 'text-rose-500' };
+        return { label: 'Neutral', score: Math.round(avgScore), color: 'text-yellow-500' };
+    }, [news]);
+
     return (
         <div className="space-y-6 max-w-[1920px] mx-auto pb-8">
             {/* Header */}
@@ -164,11 +174,14 @@ export function Newsroom() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-center py-4">
-                                <div className="text-4xl font-bold text-emerald-500 mb-1">Greed</div>
-                                <div className="text-sm text-slate-400">Score: 78/100</div>
+                                <div className={`text-4xl font-bold ${marketMood.color} mb-1`}>{marketMood.label}</div>
+                                <div className="text-sm text-slate-400">Score: {marketMood.score}/100</div>
                             </div>
                             <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-gradient-to-r from-rose-500 via-yellow-500 to-emerald-500 w-[78%]" />
+                                <div 
+                                    className="h-full bg-gradient-to-r from-rose-500 via-yellow-500 to-emerald-500 transition-all duration-1000" 
+                                    style={{ width: `${marketMood.score}%` }}
+                                />
                             </div>
                             <p className="text-xs text-center text-slate-500 mt-2">
                                 Based on analysis of {news?.length || 0} articles today.

@@ -40,9 +40,10 @@ export function NewsCard({ item }: NewsCardProps) {
                             {item.title}
                         </h3>
                         <div className="flex items-center gap-2 mt-2">
-                            <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${config.bg} ${config.color} font-medium`}>
+                            <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${config.bg} ${config.color} font-medium`} title="Analyzed by Gemini AI">
                                 <Icon className="h-3 w-3" />
                                 {item.sentiment.toUpperCase()} ({item.score})
+                                <span className="ml-1 text-[10px] opacity-70">✨ AI</span>
                             </span>
                         </div>
                     </div>
