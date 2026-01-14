@@ -60,7 +60,22 @@ export function WhaleWatcher() {
                 timestamp: new Date(now.getTime() - i * 1000 * 60 * (5 + seededRandom(seed)*10)).toISOString()
             });
         }
-        return txs;
+
+        // Statistical Anomaly Detection (Z-Score)
+        const values = txs.map(t => t.amount_usd);
+        const mean = values.reduce((a, b) => a + b, 0) / values.length;
+        const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+        const stdDev = Math.sqrt(variance);
+
+        // Tag anomalies (> 1.5 StdDev for demo purposes)
+        return txs.map(tx => {
+            const zScore = (tx.amount_usd - mean) / stdDev;
+            return {
+                ...tx,
+                anomaly_score: zScore,
+                is_anomaly: Math.abs(zScore) > 1.8 // Flag outliers
+            };
+        });
     }, [selectedCoin, data]);
 
     const stats = useMemo(() => {

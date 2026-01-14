@@ -19,6 +19,8 @@ export interface WhaleTx {
     to: string;
     type: 'inflow' | 'outflow' | 'transfer';
     timestamp: string;
+    is_anomaly?: boolean; // New field for ML detection
+    anomaly_score?: number; // Z-Score
 }
 
 interface WhaleTxTableProps {
@@ -56,7 +58,14 @@ export function WhaleTxTable({ transactions }: WhaleTxTableProps) {
                                 </span>
                             </TableCell>
                             <TableCell className="text-right font-medium text-slate-200">
-                                {formatCurrency(tx.amount_usd, 0)}
+                                <div className="flex flex-col items-end">
+                                    <span>{formatCurrency(tx.amount_usd, 0)}</span>
+                                    {tx.is_anomaly && (
+                                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-purple-500 text-white rounded animate-pulse">
+                                            🚨 ANOMALY (Z: {tx.anomaly_score?.toFixed(1)})
+                                        </span>
+                                    )}
+                                </div>
                             </TableCell>
                             <TableCell className="text-right text-slate-400 font-mono text-xs">
                                 {tx.amount_coin.toLocaleString()} {tx.coin}
